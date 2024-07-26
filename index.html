@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="Zermos-modal.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+</body>
+
+<script>
+    // Usage example
+    const modal = new ZermosModal('margin: 20px auto;')
+        .addHeading("New Modal")
+        .addToggle("Enable Feature", true, (modal, state) => { console.log("Toggle state:", state); modal.setCondition('showExtra1', state)})
+        .addButton("Click Me", () => console.log("Button clicked"))
+        .addSubmenu("showExtra1 == true",
+            new ZermosSubModal()
+                .addText("Hello, this is a submodal")
+        )
+        .setCondition('showExtra1', true)
+        .addText("This text only shows when 'showExtra' is true");
+
+    modal.open();
+</script>
+</html>
