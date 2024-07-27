@@ -8,9 +8,18 @@ body {
     box-sizing: unset;
 }
 
+h1, h2, h3, h4, h5, h6, p {
+    color: #666;
+}
+
+p {
+    margin: 0;
+    font-size: 16px;
+}
+
 .zermos-modal {
-    width: 300px;
-    padding: 20px;
+    width: 500px;
+    /* padding: 20px; */
     border: 1px solid #ccc;
     border-radius: 10px;
     background-color: #f9f9f9;
@@ -21,10 +30,12 @@ body {
 
 .zermos-modal > div {
     margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
-.zermos-modal > div:last-child {
-    margin: 0;
+.zermos-modal > div:first-child {
+    margin-top: 20px;
 }
 
 .heading h1 {
@@ -33,6 +44,11 @@ body {
 }
 
 .toggle {
+}
+
+.zermos-modal > div.submenu {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .button div {
@@ -49,18 +65,11 @@ body {
     background-color: #0056b3;
 }
 
-.submenu {
-}
-
 .submenu .zermos-modal {
     box-shadow: none;
-    width: 260px;
-}
-
-.text p {
-    margin: 0;
-    font-size: 16px;
-    color: #666;
+    border-radius: unset;
+    border-left: 0;
+    border-right: 0;
 }
 
 .toggle-switch {
@@ -90,4 +99,76 @@ body {
 
 .toggle-switch.active .switch {
     left: 31px;
+}
+
+.url {
+}
+
+.url-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+}
+
+.url-field {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    font-size: 16px;
+    color: #333;
+    margin-right: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.button.copy {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.button.copy:hover {
+    background-color: #0056b3;
+}
+
+.separator > div:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    border-top: 1px solid #ccc;
+    background: #ccc;
+    width: 100%;
+    transform: translateY(-50%);
+    display: block;
+}
+
+.separator > div {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.separator p {
+    z-index: 100;
+    background: #f9f9f9;
+    width: fit-content;
+    position: relative;
+    padding: 0 10px;
+    text-align: center;
+}
+
+.image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    display: block;
+    margin: 0 auto;
 }

@@ -12,16 +12,27 @@
 
 <script>
     // Usage example
+    // const modal = new ZermosModal('margin: 20px auto;')
+    //     .addHeading("New Modal")
+    //     .addToggle("Enable Feature", true, (modal, state) => { console.log("Toggle state:", state); modal.setCondition('showExtra1', state)})
+    //     .addButton("Click Me", () => console.log("Button clicked"))
+    //     .addSubmenu("showExtra1 == true",
+    //         new ZermosSubModal()
+    //             .addText("Hello, this is a submodal")
+    //     )
+    //     .setCondition('showExtra1', true)
+    //     .addText("This text only shows when 'showExtra' is true")
+    //     .addSeparator("test")
+    //     .addUrl("https://zermos.kronk.tech/gedeeld/HfjAn85AJ49", true, true)
+    //
+    // modal.open();
+
     const modal = new ZermosModal('margin: 20px auto;')
-        .addHeading("New Modal")
-        .addToggle("Enable Feature", true, (modal, state) => { console.log("Toggle state:", state); modal.setCondition('showExtra1', state)})
-        .addButton("Click Me", () => console.log("Button clicked"))
-        .addSubmenu("showExtra1 == true",
-            new ZermosSubModal()
-                .addText("Hello, this is a submodal")
-        )
-        .setCondition('showExtra1', true)
-        .addText("This text only shows when 'showExtra' is true");
+        .addHeading("Jouw deelbare link", "Deel jouw rooster gemakkelijk met jouw vrienden.")
+        .addUrl("https://zermos.kronk.tech/gedeeld/HfjAn85AJ49", true, true)
+        .addSeparator("Scan me!")
+        .addImage("data:image/png;base64,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", "https://zermos.kronk.tech/gedeeld/HfjAn85AJ49")
+        .addText("Laat je vrienden dit scannen om jouw rooster te delen!")
 
     modal.open();
 </script>

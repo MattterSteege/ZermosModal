@@ -28,10 +28,11 @@
         });
     }
 
-    addHeading(text, level = 1, style = "textAlign: center") {
+    addHeading(text, subheading = "", level = 1, style = "textAlign: center") {
         return this.addComponent({
             type: 'heading',
             text,
+            subheading,
             level,
             style
         });
@@ -71,7 +72,7 @@
         });
     }
 
-    addUrl(url, showFull = true, copyButton = false) {
+    addUrl(url, showFull = false, copyButton = true) {
         return this.addComponent({
             type: 'url',
             url,
@@ -115,7 +116,8 @@
         });
     }
 
-    addSpacer(height) {
+    //height is specified like this: (20%, 16px, 2em, etc.)
+    addSpacer(height = "20px") {
         return this.addComponent({
             type: 'spacer',
             height
@@ -198,7 +200,12 @@
                 headingElement.style = component.style;
                 headingElement.innerText = component.text;
 
+                const textElement = document.createElement('p');
+                textElement.style = component.style;
+                textElement.innerText = component.subheading;
+
                 componentElement.appendChild(headingElement);
+                componentElement.appendChild(textElement);
                 break;
             }
             case "button":
@@ -244,6 +251,69 @@
                     const isActive = toggleElement.classList.contains('active');
                     component.onChange(this, isActive);
                 });
+                break;
+            }
+            case "url":
+            {
+                const urlSection = document.createElement('div');
+                urlSection.className = 'url-section';
+
+                const urlField = document.createElement('div');
+                urlField.className = 'url-field';
+                urlField.textContent = component.showFull ? component.url : new URL(component.url).pathname;
+                urlField.contentEditable = !component.copyButton;
+
+                if (component.copyButton) {
+                    const copyButton = document.createElement('div');
+                    copyButton.className = 'button copy';
+                    copyButton.textContent = 'Kopieer';
+
+                    var copyUrl = component.url;
+                    copyButton.addEventListener('click', () => {
+
+                        navigator.clipboard.writeText(copyUrl)
+                            .then(() => {
+                                console.log(`"${copyUrl}" was copied to your clipboard.`)
+                            })
+                            .catch(err => {
+                                console.error(`Error copying text to clipboard: ${err}`)
+                            })
+                    })
+
+                    urlSection.appendChild(copyButton);
+                }
+                urlSection.appendChild(urlField);
+
+                componentElement.appendChild(urlSection);
+                break;
+            }
+            case "spacer":
+            {
+                const spacerElement = document.createElement('div');
+                spacerElement.style.height = component.height;
+                componentElement.appendChild(spacerElement);
+                break;
+            }
+            case "separator":
+            {
+                const separatorElement = document.createElement('div');
+
+                const separatorTextElement = document.createElement('p');
+                separatorTextElement.innerText = component.text;
+
+
+                separatorElement.appendChild(separatorTextElement);
+                componentElement.appendChild(separatorElement);
+                break;
+            }
+            case "image":
+            {
+                const imageElement = document.createElement('img');
+                imageElement.src = component.src;
+                imageElement.alt = component.alt;
+                imageElement.style = component.style;
+
+                componentElement.appendChild(imageElement);
                 break;
             }
             case "":
