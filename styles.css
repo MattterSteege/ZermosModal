@@ -172,3 +172,45 @@ p {
     display: block;
     margin: 0 auto;
 }
+
+#datepicker {
+    position: relative;
+    width: 200px;
+}
+#selected-date {
+    padding: 10px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+#calendar {
+    position: absolute;
+    top: 40px;
+    border: 1px solid #ccc;
+    background: white;
+    display: none;
+    z-index: 1000000000;
+}
+#calendar-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #f0f0f0;
+}
+#calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    padding: 10px;
+}
+#calendar-body div {
+    text-align: center;
+    padding: 5px;
+    cursor: pointer;
+}
+#calendar-body .day {
+    background: #e0e0e0;
+}
+#calendar-body .selected {
+    background: #007bff;
+    color: white;
+}

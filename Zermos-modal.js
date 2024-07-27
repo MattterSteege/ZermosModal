@@ -19,10 +19,9 @@
     updateRenderedModal() {
         var showConditionElements = document.querySelectorAll('div[showCondition]')
         showConditionElements.forEach((element) => {
-            if (this.evaluateExpression(element.getAttribute("showCondition"))){
+            if (this.evaluateExpression(element.getAttribute("showCondition"))) {
                 element.parentElement.style.display = "block";
-            }
-            else {
+            } else {
                 element.parentElement.style.display = "none";
             }
         });
@@ -172,20 +171,11 @@
         modalElement.style = this.style;
 
         this.components.forEach(component => {
-            if (this.shouldRenderComponent(component)) {
-                const componentElement = this.renderComponent(component);
-                modalElement.appendChild(componentElement);
-            }
+            const componentElement = this.renderComponent(component);
+            modalElement.appendChild(componentElement);
         });
 
         return modalElement;
-    }
-
-    shouldRenderComponent(component) {
-        // Check if the component should be rendered based on conditions
-        // This is where you'd implement the logic for conditional rendering
-        // based on the this.conditions object
-        return true; // Placeholder - always render for now
     }
 
     renderComponent(component) {
@@ -194,8 +184,7 @@
         const componentElement = document.createElement('div');
         componentElement.classList.add(component.type);
         switch (component.type) {
-            case "heading":
-            {
+            case "heading": {
                 const headingElement = document.createElement('h' + component.level);
                 headingElement.style = component.style;
                 headingElement.innerText = component.text;
@@ -208,8 +197,7 @@
                 componentElement.appendChild(textElement);
                 break;
             }
-            case "button":
-            {
+            case "button": {
                 const buttonElement = document.createElement("div");
                 buttonElement.style = component.style;
                 buttonElement.innerText = component.text;
@@ -218,8 +206,7 @@
                 componentElement.appendChild(buttonElement);
                 break;
             }
-            case "submenu":
-            {
+            case "submenu": {
                 const subMenuElement = component.subModal.render();
                 subMenuElement.setAttribute("showCondition", component.showCondition.replace("\"", "'"));
 
@@ -227,8 +214,7 @@
                 componentElement.style.display = this.evaluateExpression(component.showCondition) ? "block" : "none";
                 break;
             }
-            case "text":
-            {
+            case "text": {
                 const textElement = document.createElement('p');
                 textElement.style = component.style;
                 textElement.innerText = component.text;
@@ -236,8 +222,7 @@
                 componentElement.appendChild(textElement);
                 break;
             }
-            case "toggle":
-            {
+            case "toggle": {
                 const toggleElement = document.createElement('div');
                 toggleElement.classList.add("toggle-switch");
                 component.state ? toggleElement.classList.add("active") : null;
@@ -253,8 +238,7 @@
                 });
                 break;
             }
-            case "url":
-            {
+            case "url": {
                 const urlSection = document.createElement('div');
                 urlSection.className = 'url-section';
 
@@ -287,15 +271,13 @@
                 componentElement.appendChild(urlSection);
                 break;
             }
-            case "spacer":
-            {
+            case "spacer": {
                 const spacerElement = document.createElement('div');
                 spacerElement.style.height = component.height;
                 componentElement.appendChild(spacerElement);
                 break;
             }
-            case "separator":
-            {
+            case "separator": {
                 const separatorElement = document.createElement('div');
 
                 const separatorTextElement = document.createElement('p');
@@ -306,8 +288,7 @@
                 componentElement.appendChild(separatorElement);
                 break;
             }
-            case "image":
-            {
+            case "image": {
                 const imageElement = document.createElement('img');
                 imageElement.src = component.src;
                 imageElement.alt = component.alt;
@@ -316,9 +297,237 @@
                 componentElement.appendChild(imageElement);
                 break;
             }
+            case "datePicker": {
+                const datepicker = document.createElement('div');
+                datepicker.id = 'datepicker';
+
+                const selectedDateElem = document.createElement('div');
+                selectedDateElem.id = 'selected-date';
+                selectedDateElem.textContent = 'Select a date';
+                datepicker.appendChild(selectedDateElem);
+
+                const calendarElem = document.createElement('div');
+                calendarElem.id = 'calendar';
+                datepicker.appendChild(calendarElem);
+
+                const calendarHeader = document.createElement('div');
+                calendarHeader.id = 'calendar-header';
+                calendarElem.appendChild(calendarHeader);
+
+                const prevMonthButton = document.createElement('button');
+                prevMonthButton.id = 'prev-month';
+                prevMonthButton.textContent = '<';
+                calendarHeader.appendChild(prevMonthButton);
+
+                const monthYearElem = document.createElement('span');
+                monthYearElem.id = 'month-year';
+                calendarHeader.appendChild(monthYearElem);
+
+                const nextMonthButton = document.createElement('button');
+                nextMonthButton.id = 'next-month';
+                nextMonthButton.textContent = '>';
+                calendarHeader.appendChild(nextMonthButton);
+
+                const calendarBody = document.createElement('div');
+                calendarBody.id = 'calendar-body';
+                calendarElem.appendChild(calendarBody);
+
+                componentElement.appendChild(datepicker);
+
+                let selectedDate = new Date();
+                let currentMonth = selectedDate.getMonth();
+                let currentYear = selectedDate.getFullYear();
+
+                function renderCalendar(month, year) {
+                    calendarBody.innerHTML = '';
+                    const firstDay = new Date(year, month).getDay();
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                    monthYearElem.textContent = `${year} - ${month + 1}`;
+
+                    for (let i = 0; i < firstDay; i++) {
+                        calendarBody.appendChild(document.createElement('div'));
+                    }
+
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const dayElem = document.createElement('div');
+                        dayElem.textContent = day;
+                        dayElem.classList.add('day');
+                        if (day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
+                            dayElem.classList.add('selected');
+                        }
+                        dayElem.addEventListener('click', function () {
+                            selectedDate = new Date(year, month, day);
+                            selectedDateElem.textContent = selectedDate.toDateString();
+                            calendarElem.style.display = 'none';
+                            renderCalendar(currentMonth, currentYear);
+                            component.onChange(this, selectedDate);
+                        });
+                        calendarBody.appendChild(dayElem);
+                    }
+                }
+
+                selectedDateElem.addEventListener('click', function () {
+                    calendarElem.style.display = calendarElem.style.display === 'none' ? 'block' : 'none';
+                });
+
+                prevMonthButton.addEventListener('click', function () {
+                    if (currentMonth === 0) {
+                        currentMonth = 11;
+                        currentYear--;
+                    } else {
+                        currentMonth--;
+                    }
+                    renderCalendar(currentMonth, currentYear);
+                });
+
+                nextMonthButton.addEventListener('click', function () {
+                    if (currentMonth === 11) {
+                        currentMonth = 0;
+                        currentYear++;
+                    } else {
+                        currentMonth++;
+                    }
+                    renderCalendar(currentMonth, currentYear);
+                });
+
+                renderCalendar(currentMonth, currentYear);
+
+                break;
+            }
+            case "dropdown": {
+                const labelElement = document.createElement('p');
+                labelElement.innerText = component.label;
+
+                const dropdownElement = document.createElement('div');
+                dropdownElement.classList.add('dropdown');
+
+                const dropdownButton = document.createElement('div');
+                dropdownButton.classList.add('dropdown-button');
+                dropdownButton.innerText = 'Select...';
+
+                const dropdownMenu = document.createElement('div');
+                dropdownMenu.classList.add('dropdown-menu');
+                dropdownMenu.style.display = 'none';
+
+                component.options.forEach(option => {
+                    const optionElement = document.createElement('div');
+                    optionElement.classList.add('dropdown-option');
+                    optionElement.innerText = option.label;
+
+                    optionElement.addEventListener('click', () => {
+                        if (component.multiSelect) {
+                            optionElement.classList.toggle('selected');
+                        } else {
+                            Array.from(dropdownMenu.children).forEach(child => {
+                                child.classList.remove('selected');
+                            });
+                            optionElement.classList.add('selected');
+                            dropdownButton.innerText = option.label;
+                            dropdownMenu.style.display = 'none';
+                        }
+                        const selectedOptions = Array.from(dropdownMenu.children)
+                            .filter(child => child.classList.contains('selected'))
+                            .map(child => child.innerText);
+                        component.onChange(this, component.multiSelect ? selectedOptions : selectedOptions[0]);
+                    });
+
+                    dropdownMenu.appendChild(optionElement);
+                });
+
+                dropdownButton.addEventListener('click', () => {
+                    dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+                });
+
+                dropdownElement.appendChild(dropdownButton);
+                dropdownElement.appendChild(dropdownMenu);
+
+                componentElement.appendChild(labelElement);
+                componentElement.appendChild(dropdownElement);
+                break;
+            }
+            case "numberInput": {
+                const labelElement = document.createElement('p');
+                labelElement.innerText = component.label;
+
+                const numberInputElement = document.createElement('div');
+                numberInputElement.classList.add('number-input');
+                numberInputElement.innerText = component.initialValue;
+
+                numberInputElement.addEventListener('click', () => {
+                    const newValue = prompt("Enter a number:", component.initialValue);
+                    if (newValue !== null && !isNaN(newValue)) {
+                        numberInputElement.innerText = parseFloat(newValue).toFixed(component.decimals);
+                        component.onChange(this, parseFloat(newValue));
+                    }
+                });
+
+                componentElement.appendChild(labelElement);
+                componentElement.appendChild(numberInputElement);
+                break;
+            }
+            case "textInput": {
+                const labelElement = document.createElement('p');
+                labelElement.innerText = component.label;
+
+                const textInputElement = document.createElement('div');
+                textInputElement.classList.add('text-input');
+                textInputElement.innerText = component.initialValue;
+
+                textInputElement.addEventListener('click', () => {
+                    const newValue = prompt("Enter text:", component.initialValue);
+                    if (newValue !== null && (component.maxLength === null || newValue.length <= component.maxLength)) {
+                        textInputElement.innerText = newValue;
+                        component.onChange(this, newValue);
+                    }
+                });
+
+                componentElement.appendChild(labelElement);
+                componentElement.appendChild(textInputElement);
+                break;
+            }
+            case "passwordInput": {
+                const labelElement = document.createElement('p');
+                labelElement.innerText = component.label;
+
+                const passwordInputElement = document.createElement('div');
+                passwordInputElement.classList.add('password-input');
+                passwordInputElement.innerText = '';
+
+                passwordInputElement.addEventListener('click', () => {
+                    const newValue = prompt("Enter password:");
+                    if (newValue !== null && (component.maxLength === null || newValue.length <= component.maxLength)) {
+                        passwordInputElement.innerText = '*'.repeat(newValue.length);
+                        component.onChange(this, newValue);
+                    }
+                });
+
+                componentElement.appendChild(labelElement);
+                componentElement.appendChild(passwordInputElement);
+                break;
+            }
+            case "textArea": {
+                const labelElement = document.createElement('p');
+                labelElement.innerText = component.label;
+
+                const textAreaElement = document.createElement('div');
+                textAreaElement.classList.add('text-area');
+                textAreaElement.innerText = component.initialValue;
+
+                textAreaElement.addEventListener('click', () => {
+                    const newValue = prompt("Enter text:", component.initialValue);
+                    if (newValue !== null && (component.maxLength === null || newValue.length <= component.maxLength)) {
+                        textAreaElement.innerText = newValue;
+                        component.onChange(this, newValue);
+                    }
+                });
+
+                componentElement.appendChild(labelElement);
+                componentElement.appendChild(textAreaElement);
+                break;
+            }
             case "":
-            default:
-            {
+            default: {
                 componentElement.innerText = "rendered default: " + component.type;
                 break;
             }
@@ -339,13 +548,20 @@
         if (comparisonMatch) {
             const [_, key, operator, value] = comparisonMatch;
             switch (operator) {
-                case '==': return this.conditions[key] === parseValue(value);
-                case '!=': return this.conditions[key] !== parseValue(value);
-                case '>': return this.conditions[key] > parseValue(value);
-                case '<': return this.conditions[key] < parseValue(value);
-                case '>=': return this.conditions[key] >= parseValue(value);
-                case '<=': return this.conditions[key] <= parseValue(value);
-                default: return false;
+                case '==':
+                    return this.conditions[key] === parseValue(value);
+                case '!=':
+                    return this.conditions[key] !== parseValue(value);
+                case '>':
+                    return this.conditions[key] > parseValue(value);
+                case '<':
+                    return this.conditions[key] < parseValue(value);
+                case '>=':
+                    return this.conditions[key] >= parseValue(value);
+                case '<=':
+                    return this.conditions[key] <= parseValue(value);
+                default:
+                    return false;
             }
         } else {
             return false;
@@ -355,7 +571,7 @@
             if (value === 'true') return true; //bool
             if (value === 'false') return false; //bool
             if (!isNaN(value)) return parseFloat(value); //number
-            if (/^["'].*["']$/.test(value)) return value.slice(1, -1);  // string
+            if (/^["'].*["']$/.test(value)) return value.slice(1, -1); // string
             throw new Error('Unsupported value type');
         }
     }
