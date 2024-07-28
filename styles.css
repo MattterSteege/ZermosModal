@@ -243,7 +243,7 @@ p {
     padding: 10px;
     border: 1px solid #ccc;
 }
-.button {
+.increment-button, .decrement-button {
     width: 40px;
     height: 40px;
     display: flex;
@@ -251,5 +251,48 @@ p {
     justify-content: center;
     cursor: pointer;
     border: 1px solid #ccc;
-    background: #f0f0f0;
+    background-color: #007bff;
+    color: white;
+    font-weight: 900;
+    border-radius: 5px;
+}
+
+.text-element-input .label, .password-element-input .label, .textarea-element-input .label {
+    display: block;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.text-element-input .display, .password-element-input .display {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.text-element-input .display, .textarea-element-input .display, .password-element-input .display {
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    font-size: 16px;
+    color: #333;
+    min-height: 20px;
+    cursor: text;
+    word-break: break-word;
+    text-align: start;
+}
+
+.textarea-element-input .display {
+    min-height: 100px;
+}
+
+.eye-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    height: 20px;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

@@ -1,8 +1,7 @@
 ﻿class ZermosModal {
-    constructor(style) {
+    constructor() {
         this.components = [];
         this.conditions = {};
-        this.style = style ?? "";
     }
 
     addComponent(component) {
@@ -27,13 +26,12 @@
         });
     }
 
-    addHeading(text, subheading = "", level = 1, style = "textAlign: center") {
+    addHeading(text, subheading = "", level = 1) {
         return this.addComponent({
             type: 'heading',
             text,
             subheading,
-            level,
-            style
+            level
         });
     }
 
@@ -46,12 +44,11 @@
         });
     }
 
-    addButton(text, onClick = () => {}, style = "") {
+    addButton(text, onClick = () => {}) {
         return this.addComponent({
             type: 'button',
             text,
-            onClick,
-            style
+            onClick
         });
     }
 
@@ -63,11 +60,10 @@
         });
     }
 
-    addText(text, style = {}) {
+    addText(text) {
         return this.addComponent({
             type: 'text',
-            text,
-            style
+            text
         });
     }
 
@@ -106,12 +102,11 @@
         });
     }
 
-    addImage(src, alt = '', style = {}) {
+    addImage(src, alt = '') {
         return this.addComponent({
             type: 'image',
             src,
-            alt,
-            style
+            alt
         });
     }
 
@@ -171,7 +166,6 @@
         // based on the components and conditions
         const modalElement = document.createElement('div');
         modalElement.className = 'zermos-modal';
-        modalElement.style = this.style;
 
         this.components.forEach(component => {
             const componentElement = this.renderComponent(component);
@@ -189,11 +183,9 @@
         switch (component.type) {
             case "heading": {
                 const headingElement = document.createElement('h' + component.level);
-                headingElement.style = component.style;
                 headingElement.innerText = component.text;
 
                 const textElement = document.createElement('p');
-                textElement.style = component.style;
                 textElement.innerText = component.subheading;
 
                 componentElement.appendChild(headingElement);
@@ -202,7 +194,6 @@
             }
             case "button": {
                 const buttonElement = document.createElement("div");
-                buttonElement.style = component.style;
                 buttonElement.innerText = component.text;
                 buttonElement.onclick = () => component.onClick(this);
 
@@ -219,7 +210,6 @@
             }
             case "text": {
                 const textElement = document.createElement('p');
-                textElement.style = component.style;
                 textElement.innerText = component.text;
 
                 componentElement.appendChild(textElement);
@@ -229,7 +219,6 @@
                 const toggleElement = document.createElement('div');
                 toggleElement.classList.add("toggle-switch");
                 component.state ? toggleElement.classList.add("active") : null;
-                toggleElement.style = component.style;
                 toggleElement.innerHTML = "<div class=\"switch\"></div>"
 
                 componentElement.appendChild(toggleElement);
@@ -295,7 +284,6 @@
                 const imageElement = document.createElement('img');
                 imageElement.src = component.src;
                 imageElement.alt = component.alt;
-                imageElement.style = component.style;
 
                 componentElement.appendChild(imageElement);
                 break;
@@ -462,7 +450,7 @@
 
                 // Create the decrement button
                 const decrementButton = document.createElement('button');
-                decrementButton.className = 'button';
+                decrementButton.className = 'decrement-button';
                 decrementButton.textContent = '-';
 
                 // Create the span for number display
@@ -473,7 +461,7 @@
 
                 // Create the increment button
                 const incrementButton = document.createElement('button');
-                incrementButton.className = 'button';
+                incrementButton.className = 'increment-button';
                 incrementButton.textContent = '+';
 
                 // Append the buttons and span to the main div
@@ -482,8 +470,8 @@
                 numberInput.appendChild(incrementButton);
 
                 function updateDisplay() {
-                    console.log(value)
                     numberDisplay.textContent = value.toString();
+                    component.onChange(this, value);
                 }
 
                 function increment() {
@@ -531,63 +519,142 @@
                 break;
             }
             case "textInput": {
-                const labelElement = document.createElement('p');
-                labelElement.innerText = component.label;
+                const label = component.label;
+                const initialValue = component.initialValue;
+                const maxLength = component.maxLength;
 
-                const textInputElement = document.createElement('div');
-                textInputElement.classList.add('text-input');
-                textInputElement.innerText = component.initialValue;
+// Create the main div
+                const textElementInput = document.createElement('div');
+                textElementInput.className = 'text-element-input';
 
-                textInputElement.addEventListener('click', () => {
-                    const newValue = prompt("Enter text:", component.initialValue);
-                    if (newValue !== null && (component.maxLength === null || newValue.length <= component.maxLength)) {
-                        textInputElement.innerText = newValue;
-                        component.onChange(this, newValue);
+// Create the label
+                const inputLabel = document.createElement('p');
+                inputLabel.className = "label"
+                inputLabel.textContent = label;
+
+// Create the span for text display
+                const textDisplay = document.createElement('div');
+                textDisplay.contentEditable = 'true';
+                textDisplay.className = 'display';
+                textDisplay.textContent = initialValue;
+
+// Append the label and span to the main div
+                textElementInput.appendChild(inputLabel);
+                textElementInput.appendChild(textDisplay);
+
+                textElementInput.addEventListener("keypress", (e) => {
+                    if (textElementInput.innerText.length >= maxLength || e.key === "Enter") {
+                        e.preventDefault();
                     }
                 });
 
-                componentElement.appendChild(labelElement);
-                componentElement.appendChild(textInputElement);
+                componentElement.appendChild(textElementInput);
                 break;
             }
             case "passwordInput": {
-                const labelElement = document.createElement('p');
-                labelElement.innerText = component.label;
+                const label = component.label;
+                const maxLength = component.maxLength;
+                let password = '';
+                let showPassword = false;
 
-                const passwordInputElement = document.createElement('div');
-                passwordInputElement.classList.add('password-input');
-                passwordInputElement.innerText = '';
+// Create the main div
+                const textElementInput = document.createElement('div');
+                textElementInput.className = 'password-element-input';
 
-                passwordInputElement.addEventListener('click', () => {
-                    const newValue = prompt("Enter password:");
-                    if (newValue !== null && (component.maxLength === null || newValue.length <= component.maxLength)) {
-                        passwordInputElement.innerText = '*'.repeat(newValue.length);
-                        component.onChange(this, newValue);
-                    }
+// Create the label
+                const inputLabel = document.createElement('p');
+                inputLabel.className = "label";
+                inputLabel.textContent = label;
+
+// Create the span for text display
+                const textDisplay = document.createElement('div');
+                textDisplay.contentEditable = 'true';
+                textDisplay.className = 'display';
+
+// Create the eye icon
+                const eyeIcon = document.createElement('span');
+                eyeIcon.innerText = "👀"
+                eyeIcon.className = 'eye-icon';
+
+// Toggle password visibility
+                eyeIcon.addEventListener('click', () => {
+                    showPassword = !showPassword;
+                    updateDisplay();
                 });
 
-                componentElement.appendChild(labelElement);
-                componentElement.appendChild(passwordInputElement);
+// Append the label, span, and eye icon to the main div
+                textElementInput.appendChild(inputLabel);
+                textElementInput.appendChild(textDisplay);
+                textElementInput.appendChild(eyeIcon);
+
+                textElementInput.addEventListener("keydown", (e) => {
+                    let sel = window.getSelection();
+                    let pos = sel.focusOffset;
+
+                    if (e.key === "Backspace") {
+                        if (pos > 0) {
+                            password = password.slice(0, pos - 1) + password.slice(pos);
+                        }
+                    } else if (e.key.length === 1 && password.length < maxLength) {
+                        password = password.slice(0, pos) + e.key + password.slice(pos);
+                    } else if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
+                        e.preventDefault();
+                    }
+
+                    updateDisplay();
+                    setCursorPosition(textDisplay, pos + (e.key === "Backspace" ? -1 : 1));
+                    e.preventDefault();
+                });
+
+// Function to set the cursor position within contentEditable
+                function setCursorPosition(contentEditableElement, position) {
+                    let range = document.createRange();
+                    let sel = window.getSelection();
+                    range.setStart(contentEditableElement.childNodes[0], position);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+
+// Function to update the display based on showPassword toggle
+                function updateDisplay() {
+                    textDisplay.innerText = showPassword ? password : '*'.repeat(password.length);
+                }
+
+                componentElement.appendChild(textElementInput);
                 break;
             }
             case "textArea": {
-                const labelElement = document.createElement('p');
-                labelElement.innerText = component.label;
+                const label = component.label;
+                const initialValue = component.initialValue;
+                const maxLength = component.maxLength;
 
-                const textAreaElement = document.createElement('div');
-                textAreaElement.classList.add('text-area');
-                textAreaElement.innerText = component.initialValue;
+// Create the main div
+                const textAreaElementInput = document.createElement('div');
+                textAreaElementInput.className = 'textarea-element-input';
 
-                textAreaElement.addEventListener('click', () => {
-                    const newValue = prompt("Enter text:", component.initialValue);
-                    if (newValue !== null && (component.maxLength === null || newValue.length <= component.maxLength)) {
-                        textAreaElement.innerText = newValue;
-                        component.onChange(this, newValue);
+// Create the label
+                const inputLabel = document.createElement('p');
+                inputLabel.className = "label"
+                inputLabel.textContent = label;
+
+// Create the span for text display
+                const textDisplay = document.createElement('div');
+                textDisplay.contentEditable = 'true';
+                textDisplay.className = 'display';
+                textDisplay.textContent = initialValue;
+
+// Append the label and span to the main div
+                textAreaElementInput.appendChild(inputLabel);
+                textAreaElementInput.appendChild(textDisplay);
+
+                textAreaElementInput.addEventListener("keypress", (e) => {
+                    if (textAreaElementInput.innerText.length >= maxLength) {
+                        e.preventDefault();
                     }
                 });
 
-                componentElement.appendChild(labelElement);
-                componentElement.appendChild(textAreaElement);
+                componentElement.appendChild(textAreaElementInput);
                 break;
             }
             case "":
