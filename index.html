@@ -32,7 +32,6 @@
     const subModal = new ZermosSubModal("background-color: lightgray; padding: 10px;");
     subModal.addHeading("Submenu Heading", "This is a subheading for the submenu", 2);
     modal.addSubmenu("toggleEnabled == true", subModal);
-    modal.setCondition("toggleEnabled", true)
 
     // Add a text block
     modal.addText("This is a simple text block.", "font-style: italic;");
@@ -64,7 +63,7 @@
     modal.addSpacer("30px");
 
     // Add a number input
-    modal.addNumberInput("Enter a number", 10, 2, (context, number) => {
+    modal.addNumberInput("Enter a number", 10, 2, Number.MIN_VALUE, Number.MAX_VALUE, 1, (context, number) => {
         console.log("Entered number:", number);
     });
 

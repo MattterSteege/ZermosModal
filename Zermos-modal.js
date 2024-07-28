@@ -123,12 +123,15 @@
         });
     }
 
-    addNumberInput(label, initialValue = 0, decimals = 0, onChange = () => {}) {
+    addNumberInput(label, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1,  onChange = () => {}) {
         return this.addComponent({
             type: 'numberInput',
             label,
             initialValue,
             decimals,
+            min,
+            max,
+            step,
             onChange
         });
     }
@@ -447,23 +450,84 @@
                 break;
             }
             case "numberInput": {
-                const labelElement = document.createElement('p');
-                labelElement.innerText = component.label;
+                const min = component.min;
+                const max = component.max;
+                const step = component.step;
+                let value = component.initialValue;
 
-                const numberInputElement = document.createElement('div');
-                numberInputElement.classList.add('number-input');
-                numberInputElement.innerText = component.initialValue;
+                // Create the main div
+                const numberInput = document.createElement('div');
+                numberInput.className = 'number-input';
+                numberInput.id = 'customNumberInput';
 
-                numberInputElement.addEventListener('click', () => {
-                    const newValue = prompt("Enter a number:", component.initialValue);
-                    if (newValue !== null && !isNaN(newValue)) {
-                        numberInputElement.innerText = parseFloat(newValue).toFixed(component.decimals);
-                        component.onChange(this, parseFloat(newValue));
+                // Create the decrement button
+                const decrementButton = document.createElement('button');
+                decrementButton.className = 'button';
+                decrementButton.textContent = '-';
+
+                // Create the span for number display
+                const numberDisplay = document.createElement('span');
+                numberDisplay.contentEditable = 'true';
+                numberDisplay.className = 'display';
+                numberDisplay.textContent = '0';
+
+                // Create the increment button
+                const incrementButton = document.createElement('button');
+                incrementButton.className = 'button';
+                incrementButton.textContent = '+';
+
+                // Append the buttons and span to the main div
+                numberInput.appendChild(decrementButton);
+                numberInput.appendChild(numberDisplay);
+                numberInput.appendChild(incrementButton);
+
+                function updateDisplay() {
+                    console.log(value)
+                    numberDisplay.textContent = value.toString();
+                }
+
+                function increment() {
+                    if (value + step <= max) {
+                        value += step;
+                        updateDisplay();
+                    }
+                }
+
+                function decrement() {
+                    if (value - step >= min) {
+                        value -= step;
+                        updateDisplay();
+                    }
+                }
+
+                function validateAndSetInput(inputValue) {
+                    let parsedValue = parseFloat(inputValue.replace(',', '.'));
+                    if (!isNaN(parsedValue)) {
+                        if (parsedValue >= min && parsedValue <= max) {
+                            value = parsedValue;
+                            updateDisplay();
+                        }
+                    }
+                }
+
+                incrementButton.addEventListener("click", increment);
+                decrementButton.addEventListener("click", decrement);
+
+                numberDisplay.addEventListener("input", (e) => {
+                    const inputValue = e.target.textContent;
+                    validateAndSetInput(inputValue);
+                });
+
+                numberDisplay.addEventListener("keypress", (e) => {
+                    const char = String.fromCharCode(e.which);
+                    if (!/[0-9,.]/.test(char)) {
+                        e.preventDefault();
                     }
                 });
 
-                componentElement.appendChild(labelElement);
-                componentElement.appendChild(numberInputElement);
+                updateDisplay();
+
+                componentElement.appendChild(numberInput);
                 break;
             }
             case "textInput": {
