@@ -100,12 +100,8 @@ modal.addSubmenu("showAdvanced == true", advancedSettingsSubModal);
 
 ## Styling
 
-You can apply custom styles to the modal and its components if one component needs special styling, the general styling should be done via a css file (take styles.css as a base)
+You can apply custom styles to the modal and its components via a css file (take styles.css as a base)
 
-```javascript
-const modal = new ZermosModal("background-color: #f0f0f0; padding: 20px;");
-modal.addButton("Styled Button", () => {}, "background-color: blue; color: white;");
-```
 
 ## Examples
 
