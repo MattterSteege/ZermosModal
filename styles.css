@@ -18,7 +18,10 @@ p {
 }
 
 .zermos-modal {
-    width: 500px;
+    width: 80%;
+    position: absolute;
+    left: 10%;
+    top: 50px;
     /* padding: 20px; */
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -60,9 +63,30 @@ p {
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
+    width: calc(100% - 40px);
 }
 
 .button div:hover {
+    background-color: #0056b3;
+}
+
+.doubleButton, .tripleButton {
+    display: flex;
+    gap: 20px;
+}
+
+.doubleButton div, .tripleButton div {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+}
+
+.doubleButton div:hover, .tripleButton div:hover {
     background-color: #0056b3;
 }
 
@@ -71,6 +95,8 @@ p {
     border-radius: unset;
     border-left: 0;
     border-right: 0;
+    width: 100%;
+    position: initial;
 }
 
 .toggle-switch {
@@ -185,7 +211,7 @@ p {
 }
 #calendar {
     position: absolute;
-    top: 40px;
+    top: 60px;
     border: 1px solid #ccc;
     background: white;
     display: none;

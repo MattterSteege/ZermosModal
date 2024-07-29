@@ -52,6 +52,28 @@
         });
     }
 
+    addDoubleButtons(text, secondText, onClick = () => {}, secondOnClick = () => {}) {
+        return this.addComponent({
+            type: 'doubleButton',
+            text,
+            onClick,
+            secondText,
+            secondOnClick
+        });
+    }
+
+    addTripleButtons(text, secondText, thirdText, onClick = () => {}, secondOnClick = () => {}, thirdOnClick = () => {}) {
+        return this.addComponent({
+            type: 'tripleButton',
+            text,
+            onClick,
+            secondText,
+            secondOnClick,
+            thirdText,
+            thirdOnClick
+        });
+    }
+
     addSubmenu(showCondition, subModal) {
         return this.addComponent({
             type: 'submenu',
@@ -200,6 +222,38 @@
                 componentElement.appendChild(buttonElement);
                 break;
             }
+            case "doubleButton": {
+                const buttonElement = document.createElement("div");
+                buttonElement.innerText = component.text;
+                buttonElement.onclick = () => component.onClick(this);
+
+                const secondButtonElement = document.createElement("div");
+                secondButtonElement.innerText = component.secondText;
+                secondButtonElement.onclick = () => component.secondOnClick(this);
+
+                componentElement.appendChild(buttonElement);
+                componentElement.appendChild(secondButtonElement);
+                break;
+            }
+            case "tripleButton": {
+                const buttonElement = document.createElement("div");
+                buttonElement.innerText = component.text;
+                buttonElement.onclick = () => component.onClick(this);
+
+                const secondButtonElement = document.createElement("div");
+                secondButtonElement.innerText = component.secondText;
+                secondButtonElement.onclick = () => component.secondOnClick(this);
+
+                const thirdButtonElement = document.createElement("div");
+                thirdButtonElement.innerText = component.thirdText;
+                thirdButtonElement.onclick = () => component.thirdOnClick(this);
+
+                componentElement.appendChild(buttonElement);
+                componentElement.appendChild(secondButtonElement);
+                componentElement.appendChild(thirdButtonElement);
+                componentElement.appendChild(thirdButtonElement);
+                break;
+            }
             case "submenu": {
                 const subMenuElement = component.subModal.render();
                 subMenuElement.setAttribute("showCondition", component.showCondition.replace("\"", "'"));
@@ -334,9 +388,11 @@
                     const firstDay = new Date(year, month).getDay();
                     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-                    monthYearElem.textContent = `${year} - ${month + 1}`;
+                    console.log(firstDay);
 
-                    for (let i = 0; i < firstDay; i++) {
+                    monthYearElem.textContent = new Date(year, month + 1, 0).toLocaleString('default', { year: 'numeric', month: 'long' });
+
+                    for (let i = 0; i < firstDay - 1; i++) {
                         calendarBody.appendChild(document.createElement('div'));
                     }
 
@@ -618,7 +674,7 @@
 
 // Function to update the display based on showPassword toggle
                 function updateDisplay() {
-                    textDisplay.innerText = showPassword ? password : '*'.repeat(password.length);
+                    textDisplay.innerText = showPassword ? password : '•'.repeat(password.length);
                 }
 
                 componentElement.appendChild(textElementInput);
