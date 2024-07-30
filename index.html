@@ -46,13 +46,6 @@
             alert("Button 3 clicked!");
         });
 
-    // Add a submenu
-    const subModal = new ZermosSubModal();
-    subModal.addHeading("Submenu Heading", "This is a subheading for the submenu", 2);
-    modal.addSubmenu("toggleEnabled == true", subModal);
-
-    modal.setCondition("toggleEnabled", true)
-
     // Add a text block
     modal.addText("This is a simple text block.");
 
@@ -68,8 +61,27 @@
     modal.addDropdown("Choose an option", [
         { label: "Option 1", value: "1" },
         { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
         { label: "Option 3", value: "3" }
     ], false, (context, selectedOption) => {
+        console.log("Selected option:", selectedOption);
+    });
+
+    // Add a dropdown
+    modal.addDropdown("Choose an option (multiselect)", [
+        { label: "Option 1", value: "1" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 2", value: "2" },
+        { label: "Option 3", value: "3" }
+    ], true, (context, selectedOption) => {
         console.log("Selected option:", selectedOption);
     });
 
@@ -101,6 +113,13 @@
     modal.addTextArea("Enter a detailed description", "Default description", 200, (context, description) => {
         console.log("Entered description:", description);
     });
+
+    // Add a submenu
+    const subModal = modal.deepCopy();
+    console.log(subModal)
+    modal.addSubmenu("toggleEnabled == true", subModal);
+
+    modal.setCondition("toggleEnabled", true)
 
     // Open the modal
     modal.open();

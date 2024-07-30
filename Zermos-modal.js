@@ -1,7 +1,7 @@
 ﻿class ZermosModal {
-    constructor() {
-        this.components = [];
-        this.conditions = {};
+    constructor(components = [], conditions = {}) {
+        this.components = components;
+        this.conditions = conditions;
     }
 
     addComponent(component) {
@@ -280,7 +280,7 @@
                 toggleElement.addEventListener('click', () => {
                     toggleElement.classList.toggle('active');
                     const isActive = toggleElement.classList.contains('active');
-                    component.onChange(this, isActive);
+                    if (component.onChange) component.onChange(this, isActive);
                 });
                 break;
             }
@@ -408,7 +408,7 @@
                             selectedDateElem.textContent = selectedDate.toDateString();
                             calendarElem.style.display = 'none';
                             renderCalendar(currentMonth, currentYear);
-                            component.onChange(this, selectedDate);
+                            if (component.onChange) component.onChange(this, selectedDate);
                         });
                         calendarBody.appendChild(dayElem);
                     }
@@ -455,7 +455,6 @@
 
                 const dropdownMenu = document.createElement('div');
                 dropdownMenu.classList.add('dropdown-menu');
-                dropdownMenu.style.display = 'none';
 
                 component.options.forEach(option => {
                     const optionElement = document.createElement('div');
@@ -470,20 +469,23 @@
                                 child.classList.remove('selected');
                             });
                             optionElement.classList.add('selected');
-                            dropdownButton.innerText = option.label;
-                            dropdownMenu.style.display = 'none';
+                            dropdownButton.click();
                         }
                         const selectedOptions = Array.from(dropdownMenu.children)
                             .filter(child => child.classList.contains('selected'))
                             .map(child => child.innerText);
-                        component.onChange(this, component.multiSelect ? selectedOptions : selectedOptions[0]);
+
+                        dropdownButton.innerText = selectedOptions.join(", ") === "" ? "Select..." : selectedOptions.join(", ");
+
+                        if (component.onChange) component.onChange(this, component.multiSelect ? selectedOptions : selectedOptions[0]);
                     });
 
                     dropdownMenu.appendChild(optionElement);
                 });
 
                 dropdownButton.addEventListener('click', () => {
-                    dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+                    dropdownButton.classList.toggle("selected");
+                    dropdownMenu.classList.toggle("show");
                 });
 
                 dropdownElement.appendChild(dropdownButton);
@@ -527,7 +529,8 @@
 
                 function updateDisplay() {
                     numberDisplay.textContent = value.toString();
-                    component.onChange(this, value);
+                    console.log(component)
+                    if (component.onChange) component.onChange(this, value);
                 }
 
                 function increment() {
@@ -762,6 +765,23 @@
             throw new Error('Unsupported value type');
         }
     }
+
+    // Method to create a deep copy
+    deepCopy() {
+        // Manually deep copy components and conditions
+        const copiedComponents = this.components.map(component => {
+            return {
+                ...component,
+                onChange: component.onChange // preserve function reference
+            };
+        });
+
+        // For conditions, assuming they don't contain functions
+        const copiedConditions = JSON.parse(JSON.stringify(this.conditions));
+
+        return new ZermosModal(copiedComponents, copiedConditions);
+    }
+
 }
 
 class ZermosSubModal extends ZermosModal {
