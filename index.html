@@ -11,117 +11,26 @@
 </body>
 
 <script>
-    // Create the main modal instance
     const modal = new ZermosModal();
 
-    // Add a heading
-    modal.addHeading("Main Heading", "This is a subheading", 1);
-
-    // Add a toggle switch
-    modal.addToggle("Enable Feature", true, (context, state) => {
-        console.log("Toggle state:", state);
-        context.setCondition("toggleEnabled", state)
-    });
-
-    // Add a button
-    modal.addButton("Click Me", (context) => {
-        alert("Button clicked!");
-    });
-
-    // Add a button
-    modal.addDoubleButtons("Click Me", "No Click Me!", (context) => {
-        alert("Button 1 clicked!");
-    },
-    (context) => {
-        alert("Button 2 clicked!");
-    });
-
-    modal.addTripleButtons("Click Me", "No Click Me!", "No Click Me Three!", (context) => {
-            alert("Button 1 clicked!");
-        },
-        (context) => {
-            alert("Button 2 clicked!");
-        },
-        (context) => {
-            alert("Button 3 clicked!");
+    modal.addHeading("User Registration")
+        .addText("Please fill out the form below:")
+        .addTextInput("Username", "", 20, (modal, value) => console.log(value))
+        .addTextArea("Username", "", 20, (modal, value) => console.log(value))
+        .addPasswordInput("Password", 20, (modal, value) => console.log(`Password set: ${value}`))
+        .addDatePicker("Date of Birth", new Date(), (modal, date) => console.log(`DoB: ${date}`))
+        .addDropdown("Country", [
+            { label: "USA", value: "us" },
+            { label: "Canada", value: "ca" },
+            { label: "UK", value: "uk" }
+        ], false, (modal, selected) => console.log(`Country: ${selected}`))
+        .addToggle("Subscribe to newsletter", false, (modal, state) => console.log(`Subscribed: ${state}`))
+        .addButton("Register", (modal) => {
+            // Registration logic
+            console.log("Registration submitted");
+            console.log(modal.getComponentvalues())
         });
 
-    // Add a text block
-    modal.addText("This is a simple text block.");
-
-    // Add a URL display
-    modal.addUrl("https://www.example.com", true, true);
-
-    // Add a date picker
-    modal.addDatePicker("Pick a date", new Date(), (context, date) => {
-        console.log("Selected date:", date);
-    });
-
-    // Add a dropdown
-    modal.addDropdown("Choose an option", [
-        { label: "Option 1", value: "1" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 3", value: "3" }
-    ], false, (context, selectedOption) => {
-        console.log("Selected option:", selectedOption);
-    });
-
-    // Add a dropdown
-    modal.addDropdown("Choose an option (multiselect)", [
-        { label: "Option 1", value: "1" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 2", value: "2" },
-        { label: "Option 3", value: "3" }
-    ], true, (context, selectedOption) => {
-        console.log("Selected option:", selectedOption);
-    });
-
-    // Add a separator
-    modal.addSeparator();
-
-    // Add an image
-    modal.addImage("data:image/png;base64,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", "https://zermos.kronk.tech/gedeeld/HfjAn85AJ49", "Example Image");
-
-    // Add a spacer
-    modal.addSpacer("30px");
-
-    // Add a number input
-    modal.addNumberInput("Enter a number", 10, 2, Number.MIN_VALUE, Number.MAX_VALUE, 1, (context, number) => {
-        console.log("Entered number:", number);
-    });
-
-    // Add a text input
-    modal.addTextInput("Enter some text", "Default text", 100, (context, text) => {
-        console.log("Entered text:", text);
-    });
-
-    // Add a password input
-    modal.addPasswordInput("Enter your password", 50, (context, password) => {
-        console.log("Entered password:", password);
-    });
-
-    // Add a text area
-    modal.addTextArea("Enter a detailed description", "Default description", 200, (context, description) => {
-        console.log("Entered description:", description);
-    });
-
-    // Add a submenu
-    const subModal = modal.deepCopy();
-    console.log(subModal)
-    modal.addSubmenu("toggleEnabled == true", subModal);
-
-    modal.setCondition("toggleEnabled", true)
-
-    // Open the modal
     modal.open();
 </script>
 </html>

@@ -15,6 +15,16 @@
         return this;
     }
 
+    getComponentvalues(){
+        var values = [];
+        this.components.forEach((elem) => {
+            if (elem.userSetValue){
+                values.push(elem.userSetValue);
+            }
+        });
+        return values;
+    }
+
     updateRenderedModal() {
         var showConditionElements = document.querySelectorAll('div[showCondition]')
         showConditionElements.forEach((element) => {
@@ -280,7 +290,10 @@
                 toggleElement.addEventListener('click', () => {
                     toggleElement.classList.toggle('active');
                     const isActive = toggleElement.classList.contains('active');
-                    if (component.onChange) component.onChange(this, isActive);
+                    if (component.onChange) {
+                        component.onChange(this, isActive);
+                        component.userSetValue = isActive;
+                    }
                 });
                 break;
             }
@@ -408,7 +421,10 @@
                             selectedDateElem.textContent = selectedDate.toDateString();
                             calendarElem.style.display = 'none';
                             renderCalendar(currentMonth, currentYear);
-                            if (component.onChange) component.onChange(this, selectedDate);
+                            if (component.onChange) {
+                                component.onChange(this, selectedDate);
+                                component.userSetValue = selectedDate;
+                            }
                         });
                         calendarBody.appendChild(dayElem);
                     }
@@ -477,7 +493,10 @@
 
                         dropdownButton.innerText = selectedOptions.join(", ") === "" ? "Select..." : selectedOptions.join(", ");
 
-                        if (component.onChange) component.onChange(this, component.multiSelect ? selectedOptions : selectedOptions[0]);
+                        if (component.onChange) {
+                            component.onChange(this, component.multiSelect ? selectedOptions : selectedOptions[0]);
+                            component.userSetValue = component.multiSelect ? selectedOptions : selectedOptions[0];
+                        }
                     });
 
                     dropdownMenu.appendChild(optionElement);
@@ -529,8 +548,10 @@
 
                 function updateDisplay() {
                     numberDisplay.textContent = value.toString();
-                    console.log(component)
-                    if (component.onChange) component.onChange(this, value);
+                    if (component.onChange) {
+                        component.onChange(this, value);
+                        component.userSetValue = value;
+                    }
                 }
 
                 function increment() {
@@ -604,6 +625,14 @@
                 textElementInput.addEventListener("keypress", (e) => {
                     if (textElementInput.innerText.length >= maxLength || e.key === "Enter") {
                         e.preventDefault();
+                        return;
+                    }
+                });
+
+                textElementInput.addEventListener("input", (e) => {
+                    if (component.onChange) {
+                        component.onChange(this, e.target.innerText);
+                        component.userSetValue = e.target.innerText;
                     }
                 });
 
@@ -667,6 +696,8 @@
 
 // Function to set the cursor position within contentEditable
                 function setCursorPosition(contentEditableElement, position) {
+                    position = position < 0 ? 0 : position;
+                    position = position > maxLength ? maxLength : position;
                     let range = document.createRange();
                     let sel = window.getSelection();
                     range.setStart(contentEditableElement.childNodes[0], position);
@@ -678,6 +709,10 @@
 // Function to update the display based on showPassword toggle
                 function updateDisplay() {
                     textDisplay.innerText = showPassword ? password : '•'.repeat(password.length);
+                    if (component.onChange) {
+                        component.onChange(this, password);
+                        component.userSetValue = password;
+                    }
                 }
 
                 componentElement.appendChild(textElementInput);
@@ -710,6 +745,13 @@
                 textAreaElementInput.addEventListener("keypress", (e) => {
                     if (textAreaElementInput.innerText.length >= maxLength) {
                         e.preventDefault();
+                    }
+                });
+
+                textAreaElementInput.addEventListener("input", (e) => {
+                    if (component.onChange) {
+                        component.onChange(this, e.target.innerText);
+                        component.userSetValue = e.target.innerText;
                     }
                 });
 
