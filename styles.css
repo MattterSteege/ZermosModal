@@ -47,15 +47,14 @@ p {
     color: #333;
 }
 
-.toggle {
-}
+.toggle {display: flex;align-items: center;justify-content: space-between;}
 
 .zermos-modal > div.submenu {
     margin-left: 0;
     margin-right: 0;
 }
 
-.button div {
+.button button {
     display: inline-block;
     padding: 10px 20px;
     background-color: #007bff;
@@ -64,9 +63,11 @@ p {
     cursor: pointer;
     text-align: center;
     width: calc(100% - 40px);
+    outline: none;
+    border: none;
 }
 
-.button div:hover {
+.button button:hover {
     background-color: #0056b3;
 }
 
@@ -201,16 +202,20 @@ p {
     margin: 0 auto;
 }
 
-#datepicker {
+.datepicker-parent {
     position: relative;
-    width: 200px;
-}
-#selected-date {
+    width: calc(100% - 20px);
     padding: 10px;
     border: 1px solid #ccc;
-    cursor: pointer;
+    border-radius: 5px;
+    background-color: #fff;
 }
-#calendar {
+.selected-date {
+    /* padding: 10px; */
+    /* border: 1px solid #ccc; */
+    /* cursor: pointer; */
+}
+.calendar {
     position: absolute;
     top: 60px;
     border: 1px solid #ccc;
@@ -218,27 +223,27 @@ p {
     display: none;
     z-index: 1000000000;
 }
-#calendar-header {
+.calendar-header {
     display: flex;
     justify-content: space-between;
     padding: 10px;
     background: #f0f0f0;
 }
-#calendar-body {
+.calendar-body {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
     padding: 10px;
 }
-#calendar-body div {
+.calendar-body div {
     text-align: center;
     padding: 5px;
     cursor: pointer;
 }
-#calendar-body .day {
+.calendar-body .day {
     background: #e0e0e0;
 }
-#calendar-body .selected {
+.calendar-body .selected {
     background: #007bff;
     color: white;
 }
@@ -342,9 +347,11 @@ p {
     overflow: hidden;
     white-space: nowrap;
     padding-right: 30px;
+    width: calc(100% - 40px);
+    text-align: start;
 }
 
-.dropdown-button::after {
+.dropdown-button::after, .datepicker-parent::after {
     content: '×';
     position: absolute;
     right: 10px;
@@ -359,7 +366,7 @@ p {
     transition: all 0.25s ease;
 }
 
-.dropdown-button.selected::after {
+.dropdown-button.selected::after, .datepicker-parent.selected::after {
     rotate: 0deg;
 }
 
