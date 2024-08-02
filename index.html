@@ -11,25 +11,27 @@
 </body>
 
 <script>
+    const ideaSubmissionSubModal = new ZermosSubModal()
+    .addHeading("Vertel eens, wat is jouw idee?")
+    .addTextArea("", true)
+
+    const bugSubmissionSubModal = new ZermosSubModal()
+        .addHeading("Vertel eens, wat is het probleem?")
+        .addTextArea("", true)
+
     const modal = new ZermosModal();
 
-    modal.addHeading("User Registration")
-        .addText("Please fill out the form below:")
-        .addTextInput("Username", "", 20, (modal, value) => console.log(value))
-        .addTextArea("Username", "", 20, (modal, value) => console.log(value))
-        .addPasswordInput("Password", 20, (modal, value) => console.log(`Password set: ${value}`))
-        .addDatePicker("Date of Birth", new Date(), (modal, date) => console.log(`DoB: ${date}`))
-        .addDropdown("Country", [
-            { label: "USA", value: "us" },
-            { label: "Canada", value: "ca" },
-            { label: "UK", value: "uk" }
-        ], false, (modal, selected) => console.log(`Country: ${selected}`))
-        .addToggle("Subscribe to newsletter", false, (modal, state) => console.log(`Subscribed: ${state}`))
-        .addButton("Register", (modal) => {
-            // Registration logic
-            console.log("Registration submitted");
-            console.log(modal.getComponentsValue())
-        });
+    modal.addHeading("Bug of idee?")
+        .addText("Heb je een bug gevonden in Zermos of heb je een baanbrekend idee, vul de korte vragenlijst hieronder!")
+        .addDropdown("Waar wil je me over bereiken?",[
+            { label: "Ik wil een bug rapporteren", value: "bug" },
+            { label: "Ik heb een idee voor Zermos", value: "idee" }
+        ], true, false, (ctx, value) => {modal.setCondition("type", value); console.log(ctx, value)})
+        .addSubmenu("type == \"idee\"", ideaSubmissionSubModal)
+        .addSubmenu("type == \"bug\"", bugSubmissionSubModal)
+        .addText("kan ik je via je mail ([email]) bereiken op als ik extra vragen heb of ontwikkelingen?")
+        .addToggle("Ja hou me op de hoogte!")
+
 
     modal.open();
 </script>

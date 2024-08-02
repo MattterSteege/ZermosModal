@@ -5,6 +5,7 @@
     }
 
     addComponent(component) {
+        component.id = (Math.random()).toString(36).substring(2);
         this.components.push(component);
         return this;
     }
@@ -16,9 +17,38 @@
     }
 
     getComponentsValue() {
-        return this.components
-            .filter(elem => elem.userSetValue)
-            .map(elem => [elem.type, elem.userSetValue]);
+        var values = [];
+        var correctForm = true;
+        this.components.forEach((elem) => {
+            if ((elem.required && (elem.userSetValue === "" || elem.userSetValue === null || elem.userSetValue === undefined)) && this.isInputType(elem.type)){
+                var notcorrect = document.querySelector('#' + elem.id);
+                console.log(notcorrect, "is not correct")
+                correctForm = false;
+            }
+            else if (this.isInputType(elem.type))
+            {
+                var value = {type: elem.type, value: null};
+                if (elem.userSetValue === "true" || elem.userSetValue === "false")
+                    value.value = !!elem.userSetValue;
+                else
+                    value.value = elem.userSetValue;
+
+
+                values.push(value)
+            }
+        });
+
+        if (correctForm){
+            return values;
+        }
+        else{
+            return null;
+        }
+    }
+
+    isInputType(type){
+        console.log(type);
+        return type.toLowerCase().includes("input");
     }
 
     updateRenderedModal() {
@@ -33,7 +63,7 @@
     }
 
     addToggle(label, initialState = false, onChange = () => {}) {
-        return this.addComponent({ type: 'toggle', label, state: initialState, onChange });
+        return this.addComponent({ type: 'toggleInput', label, state: initialState, onChange });
     }
 
     addButton(text, onClick = () => {}) {
@@ -60,12 +90,13 @@
         return this.addComponent({ type: 'url', url, showFull, copyButton });
     }
 
-    addDatePicker(label, initialDate = new Date(), onChange = () => {}) {
-        return this.addComponent({ type: 'datePicker', label, initialDate, onChange });
+    ///INPUT ELEMENTS
+    addDatePicker(label, required = false, initialDate = new Date(), onChange = () => {}) {
+        return this.addComponent({ type: 'datePickerInput', label, required, initialDate, onChange });
     }
 
-    addDropdown(label, options, multiSelect = false, onChange = () => {}) {
-        return this.addComponent({ type: 'dropdown', label, options, multiSelect, onChange });
+    addDropdown(label, options, required = false, multiSelect = false, onChange = () => {}) {
+        return this.addComponent({ type: 'dropdownInput', label, options, required, multiSelect, onChange });
     }
 
     addSeparator(text = '') {
@@ -80,20 +111,20 @@
         return this.addComponent({ type: 'spacer', height });
     }
 
-    addNumberInput(label, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = () => {}) {
-        return this.addComponent({ type: 'numberInput', label, initialValue, decimals, min, max, step, onChange });
+    addNumberInput(label, required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = () => {}) {
+        return this.addComponent({ type: 'numberInput', label, required, initialValue, decimals, min, max, step, onChange });
     }
 
-    addTextInput(label, initialValue = '', maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'textInput', label, initialValue, maxLength, onChange });
+    addTextInput(label, required = false, initialValue = '', maxLength = null, onChange = () => {}) {
+        return this.addComponent({ type: 'textInput', label, required, initialValue, maxLength, onChange });
     }
 
-    addPasswordInput(label, maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'passwordInput', label, maxLength, onChange });
+    addPasswordInput(label, required = false, maxLength = null, onChange = () => {}) {
+        return this.addComponent({ type: 'passwordInput', label, required, maxLength, onChange });
     }
 
-    addTextArea(label, initialValue = '', maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'textArea', label, initialValue, maxLength, onChange });
+    addTextArea(label, required = false, initialValue = '', maxLength = null, onChange = () => {}) {
+        return this.addComponent({ type: 'textAreaInput', label, required, initialValue, maxLength, onChange });
     }
 
     render() {
@@ -108,6 +139,7 @@
     renderComponent(component) {
         const componentElement = document.createElement('div');
         componentElement.classList.add(component.type);
+        componentElement.id = component.id;
 
         const renderMethods = {
             heading: this.renderHeading,
@@ -116,17 +148,17 @@
             tripleButton: this.renderTripleButton,
             submenu: this.renderSubmenu,
             text: this.renderText,
-            toggle: this.renderToggle,
+            toggleInput: this.renderToggle,
             url: this.renderUrl,
             spacer: this.renderSpacer,
             separator: this.renderSeparator,
             image: this.renderImage,
-            datePicker: this.renderDatePicker,
-            dropdown: this.renderDropdown,
+            datePickerInput: this.renderDatePicker,
+            dropdownInput: this.renderDropdown,
             numberInput: this.renderNumberInput,
             textInput: this.renderTextInput,
             passwordInput: this.renderPasswordInput,
-            textArea: this.renderTextArea
+            textAreaInput: this.renderTextArea
         };
 
         const renderMethod = renderMethods[component.type] || this.renderDefault;
@@ -196,6 +228,8 @@
     }
 
     renderToggle(component, componentElement) {
+        component.userSetValue = component.state.toString();
+
         const toggleElement = document.createElement('div');
         toggleElement.classList.add("toggle-switch");
         if (component.state) toggleElement.classList.add("active");
@@ -206,7 +240,7 @@
             const isActive = toggleElement.classList.contains('active');
             if (component.onChange) {
                 component.onChange(this, isActive);
-                component.userSetValue = isActive;
+                component.userSetValue = isActive.toString();
             }
         });
 
@@ -389,6 +423,7 @@
             const optionElement = document.createElement('div');
             optionElement.classList.add('dropdown-option');
             optionElement.innerText = option.label;
+            optionElement.dataset.value = option.value;
 
             optionElement.addEventListener('click', () => {
                 if (component.multiSelect) {
@@ -400,7 +435,7 @@
                 }
                 const selectedOptions = Array.from(dropdownMenu.children)
                     .filter(child => child.classList.contains('selected'))
-                    .map(child => child.innerText);
+                    .map(child => child.dataset.value);
 
                 dropdownButton.innerText = selectedOptions.length ? selectedOptions.join(", ") : "Select...";
 

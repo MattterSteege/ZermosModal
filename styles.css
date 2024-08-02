@@ -375,3 +375,9 @@ p {
     padding: 20px;
     opacity: 1;
 }
+
+.toggleInput {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
