@@ -5,7 +5,7 @@
     }
 
     addComponent(component) {
-        component.id = (Math.random()).toString(36).substring(2);
+        component.id = btoa(crypto.getRandomValues(new Uint8Array(8))).slice(0,11)
         this.components.push(component);
         return this;
     }
@@ -20,34 +20,33 @@
         var values = [];
         var correctForm = true;
         this.components.forEach((elem) => {
+            if (elem.type === "submenu"){
+                console.log("submenu found, values are:", elem.subModal.getComponentsValue().values)
+                values.push(...elem.subModal.getComponentsValue().values)
+            }
             if ((elem.required && (elem.userSetValue === "" || elem.userSetValue === null || elem.userSetValue === undefined)) && this.isInputType(elem.type)){
                 var notcorrect = document.querySelector('#' + elem.id);
-                console.log(notcorrect, "is not correct")
                 correctForm = false;
+                values.push({type: elem.type, value: null, correct: false});
             }
             else if (this.isInputType(elem.type))
             {
-                var value = {type: elem.type, value: null};
+                var value = {type: elem.type, value: null, correct: true};
                 if (elem.userSetValue === "true" || elem.userSetValue === "false")
                     value.value = !!elem.userSetValue;
+                else if (elem.userSetValue === undefined)
+                    value.value = null;
                 else
                     value.value = elem.userSetValue;
-
 
                 values.push(value)
             }
         });
 
-        if (correctForm){
-            return values;
-        }
-        else{
-            return null;
-        }
+        return {correct: correctForm, values: values};
     }
 
     isInputType(type){
-        console.log(type);
         return type.toLowerCase().includes("input");
     }
 
@@ -127,6 +126,35 @@
         return this.addComponent({ type: 'textAreaInput', label, required, initialValue, maxLength, onChange });
     }
 
+    addCheckbox(label, initialState = false, onChange = () => {}) {
+        return this.addComponent({ type: 'toggleInput', label, state: initialState, asCheckbox: true, onChange });
+    }
+
+    /// NEW
+    addSlider(label, min = 0, max = 100, step = 1, initialValue = 50, onChange = () => {}) {
+        return this.addComponent({ type: 'sliderInput', label, min, max, step, initialValue, onChange });
+    }
+
+    addColorPicker(label, required, initialColor = '#000000', onChange = () => {}) {
+        return this.addComponent({ type: 'colorPickerInput', label, required, initialColor, onChange });
+    }
+
+    addFileUpload(label, required, accept = '*', multiple = false, onChange = () => {}) {
+        return this.addComponent({ type: 'fileUploadInput', label, required, accept, multiple, onChange });
+    }
+
+    addRating(label, required, maxRating = 5, initialRating = 0, onChange = () => {}) {
+        return this.addComponent({ type: 'ratingInput', label, required, maxRating, initialRating, onChange });
+    }
+
+    addCaptcha(siteKey, required) {
+        return this.addComponent({ type: 'captchaInput', siteKey, required });
+    }
+
+    addSignature() {
+        return this.addComponent({ type: 'signatureInput' });
+    }
+
     render() {
         const modalElement = document.createElement('div');
         modalElement.className = 'zermos-modal';
@@ -158,7 +186,13 @@
             numberInput: this.renderNumberInput,
             textInput: this.renderTextInput,
             passwordInput: this.renderPasswordInput,
-            textAreaInput: this.renderTextArea
+            textAreaInput: this.renderTextArea,
+            sliderInput: this.renderSlider,
+            colorPickerInput: this.renderColorPicker,
+            fileUploadInput: this.renderFileUpload,
+            ratingInput: this.renderRating,
+            captchaInput: this.renderCaptcha,
+            signatureInput: this.renderSignature,
         };
 
         const renderMethod = renderMethods[component.type] || this.renderDefault;
@@ -232,6 +266,7 @@
 
         const toggleElement = document.createElement('div');
         toggleElement.classList.add("toggle-switch");
+        component.asCheckbox ? toggleElement.classList.add("as-checkbox") : null;
         if (component.state) toggleElement.classList.add("active");
         toggleElement.innerHTML = "<div class=\"switch\"></div>";
 
@@ -406,8 +441,6 @@
     }
 
     renderDropdown(component, componentElement) {
-        const labelElement = document.createElement('label');
-        labelElement.innerText = component.label;
 
         const dropdownElement = document.createElement('div');
         dropdownElement.classList.add('dropdown');
@@ -456,7 +489,6 @@
         dropdownElement.appendChild(dropdownButton);
         dropdownElement.appendChild(dropdownMenu);
 
-        componentElement.appendChild(labelElement);
         componentElement.appendChild(dropdownElement);
         return componentElement;
     }
@@ -464,9 +496,6 @@
     renderNumberInput(component, componentElement) {
         const numberInput = document.createElement('div');
         numberInput.className = 'number-input';
-
-        const label = document.createElement('label');
-        label.textContent = component.label;
 
         const decrementButton = document.createElement('button');
         decrementButton.className = 'decrement-button';
@@ -533,15 +562,12 @@
         const textElementInput = document.createElement('div');
         textElementInput.className = 'text-element-input';
 
-        const inputLabel = document.createElement('label');
-        inputLabel.textContent = component.label;
-
         const textDisplay = document.createElement('div');
         textDisplay.contentEditable = 'true';
         textDisplay.className = 'display';
         textDisplay.textContent = component.initialValue;
 
-        textElementInput.append(inputLabel, textDisplay);
+        textElementInput.append(textDisplay);
 
         const handleInput = (e) => {
             if (component.maxLength && e.target.innerText.length > component.maxLength) {
@@ -563,9 +589,6 @@
         const passwordInput = document.createElement('div');
         passwordInput.className = 'password-element-input';
 
-        const inputLabel = document.createElement('label');
-        inputLabel.textContent = component.label;
-
         const textDisplay = document.createElement('div');
         textDisplay.contentEditable = 'true';
         textDisplay.className = 'display';
@@ -574,7 +597,7 @@
         eyeIcon.innerText = "👀";
         eyeIcon.className = 'eye-icon';
 
-        passwordInput.append(inputLabel, textDisplay, eyeIcon);
+        passwordInput.append(textDisplay, eyeIcon);
 
         let password = '';
         let showPassword = false;
@@ -619,15 +642,12 @@
         const textAreaElementInput = document.createElement('div');
         textAreaElementInput.className = 'textarea-element-input';
 
-        const inputLabel = document.createElement('label');
-        inputLabel.textContent = component.label;
-
         const textDisplay = document.createElement('div');
         textDisplay.contentEditable = 'true';
         textDisplay.className = 'display';
         textDisplay.textContent = component.initialValue;
 
-        textAreaElementInput.append(inputLabel, textDisplay);
+        textAreaElementInput.append(textDisplay);
 
         const handleInput = (e) => {
             if (component.maxLength && e.target.innerText.length > component.maxLength) {
@@ -645,8 +665,381 @@
         return componentElement;
     }
 
+    renderSlider(component, componentElement) {
+        const sliderContainer = document.createElement('div');
+        sliderContainer.className = 'slider-container';
+
+        const sliderTrack = document.createElement('div');
+        sliderTrack.className = 'slider-track';
+
+        const sliderThumb = document.createElement('div');
+        sliderThumb.className = 'slider-thumb';
+
+        const valueDisplay = document.createElement('span');
+        valueDisplay.className = 'slider-value';
+        valueDisplay.textContent = component.initialValue;
+
+        sliderTrack.appendChild(sliderThumb);
+        sliderContainer.append(sliderTrack, valueDisplay);
+
+        const min = component.min;
+        const max = component.max;
+        const range = max - min;
+
+        // Set initial position
+        const initialPercentage = ((component.initialValue - min) / range) * 100;
+        sliderThumb.style.left = `${initialPercentage}%`;
+
+        let isDragging = false;
+
+        const updateSliderValue = (clientX) => {
+            const rect = sliderTrack.getBoundingClientRect();
+            let percentage = (clientX - rect.left) / rect.width;
+            percentage = Math.max(0, Math.min(percentage, 1));
+
+            const value = min + percentage * range;
+            const roundedValue = Math.round(value / component.step) * component.step;
+
+            sliderThumb.style.left = `${percentage * 100}%`;
+            valueDisplay.textContent = roundedValue.toFixed(getDecimalPlaces(component.step));
+
+            if (component.onChange) {
+                component.onChange(this, roundedValue);
+                component.userSetValue = roundedValue;
+            }
+        };
+
+        sliderTrack.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            applyNoSelectionClass(true); // Apply no-selection class
+            updateSliderValue(e.clientX);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                updateSliderValue(e.clientX);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            applyNoSelectionClass(false); // Apply no-selection class
+        });
+
+        componentElement.appendChild(sliderContainer);
+        return componentElement;
+
+        function getDecimalPlaces(num) {
+            // Ensure num is a floating-point number
+            let floatNum = parseFloat(num);
+            if (Math.floor(floatNum) === floatNum) return 0; // Check if the number is an integer
+
+            let decimalPart = floatNum.toString().split('.')[1];
+
+            // Trim any trailing zeroes for a more sensible decimal count
+            if (decimalPart) {
+                decimalPart = decimalPart.replace(/0+$/, '');
+                return Math.min(decimalPart.length, 2);
+            } else {
+                return 0;
+            }
+        }
+
+        // Add this function to apply and remove the no-selection CSS class
+        function applyNoSelectionClass(apply) {
+            if (apply) {
+                document.body.classList.add('no-select');
+            } else {
+                document.body.classList.remove('no-select');
+            }
+        }
+    }
+
+    renderColorPicker(component, componentElement) {
+        const colorPickerContainer = document.createElement('div');
+        colorPickerContainer.className = 'color-picker-container';
+
+        const colorDisplay = document.createElement('div');
+        colorDisplay.className = 'color-display';
+        colorDisplay.style.backgroundColor = component.initialColor;
+
+        const colorPalette = document.createElement('div');
+        colorPalette.className = 'color-palette';
+        colorPalette.style.display = "none";
+
+        const hexInput = document.createElement('div');
+        hexInput.className = 'hex-input';
+        hexInput.contentEditable = 'true';
+        hexInput.textContent = component.initialColor;
+
+        const rgbInputs = ['R', 'G', 'B'].map(channel => {
+            const input = document.createElement('div');
+            input.className = 'rgb-input';
+            input.contentEditable = 'true';
+            input.textContent = '0';
+            return input;
+        });
+
+        const colorCircle = document.createElement('canvas');
+        colorCircle.className = 'color-circle';
+        colorCircle.width = 150;
+        colorCircle.height = 150;
+
+        const ctx = colorCircle.getContext('2d');
+
+// Create a conic gradient
+        const gradient = ctx.createConicGradient(0, 75, 75);
+
+// Add five color stops
+        gradient.addColorStop(0, "red");
+        gradient.addColorStop(1/6, "yellow");
+        gradient.addColorStop(2/6, "lime");
+        gradient.addColorStop(3/6, "cyan");
+        gradient.addColorStop(4/6, "blue");
+        gradient.addColorStop(5/6, "magenta");
+        gradient.addColorStop(1, "red");
+
+// Set the fill style and draw a rectangle
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 150, 150);
+
+        const colorSelector = document.createElement('div');
+        colorSelector.className = 'color-selector';
+
+        const updateColorDisplay = (color) => {
+            colorDisplay.style.backgroundColor = color;
+            if (component.onChange) {
+                component.onChange(this, color);
+                component.userSetValue = color;
+            }
+        };
+
+        const hexToRgb = (hex) => {
+            const bigint = parseInt(hex.slice(1), 16);
+            return {
+                r: (bigint >> 16) & 255,
+                g: (bigint >> 8) & 255,
+                b: bigint & 255
+            };
+        };
+
+        const rgbToHex = (r, g, b) => {
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+        };
+
+        const setColorFromHex = (hex) => {
+            const { r, g, b } = hexToRgb(hex);
+            rgbInputs[0].textContent = r;
+            rgbInputs[1].textContent = g;
+            rgbInputs[2].textContent = b;
+            updateColorDisplay(hex);
+        };
+
+        const setColorFromRgb = () => {
+            const r = parseInt(rgbInputs[0].textContent, 10) || 0;
+            const g = parseInt(rgbInputs[1].textContent, 10) || 0;
+            const b = parseInt(rgbInputs[2].textContent, 10) || 0;
+            const hex = rgbToHex(r, g, b);
+            hexInput.textContent = hex;
+            updateColorDisplay(hex);
+        };
+
+        hexInput.addEventListener('input', (e) => {
+            const hex = e.target.textContent.trim();
+            if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                setColorFromHex(hex);
+            }
+        });
+
+        rgbInputs.forEach(input => {
+            input.addEventListener('input', setColorFromRgb);
+        });
+
+        colorDisplay.addEventListener('click', () => {
+            colorPalette.style.display = colorPalette.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!colorPickerContainer.contains(event.target)) {
+                colorPalette.style.display = 'none';
+            }
+        });
+
+        colorCircle.addEventListener('click', (e) => {
+            const rect = colorCircle.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+            setColorFromHex(hex);
+            colorSelector.style.left = `${x - 5}px`;
+            colorSelector.style.top = `${y - 5}px`;
+        });
+
+        const { r, g, b } = hexToRgb(component.initialColor);
+        rgbInputs[0].textContent = r;
+        rgbInputs[1].textContent = g;
+        rgbInputs[2].textContent = b;
+
+        colorCircle.appendChild(colorSelector);
+        colorPalette.append(hexInput, ...rgbInputs, colorCircle);
+        colorPickerContainer.append(colorDisplay, colorPalette);
+        componentElement.appendChild(colorPickerContainer);
+        return componentElement;
+    }
+
+
+    renderFileUpload(component, componentElement) {
+        const fileUploadContainer = document.createElement('div');
+        fileUploadContainer.className = 'file-upload-container';
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = component.accept;
+        fileInput.multiple = component.multiple;
+
+        fileInput.addEventListener('change', (e) => {
+            if (component.onChange) {
+                component.onChange(this, e.target.files);
+                component.userSetValue = e.target.files;
+            }
+        });
+
+        fileUploadContainer.append(fileInput);
+        componentElement.appendChild(fileUploadContainer);
+        return componentElement;
+    }
+
     renderDefault(component, componentElement) {
         componentElement.innerText = `couldn't render component of type: ${component.type}`;
+        return componentElement;
+    }
+
+    renderRating(component, componentElement) {
+        const ratingContainer = document.createElement('div');
+        ratingContainer.className = 'rating-container';
+
+        for (let i = 1; i <= component.maxRating; i++) {
+            const star = document.createElement('span');
+            star.textContent = '☆';
+            star.dataset.value = i;
+
+            if (i <= component.initialRating) {
+                star.textContent = '★';
+            }
+
+            star.addEventListener('click', (e) => {
+                const value = parseInt(e.target.dataset.value);
+                ratingContainer.querySelectorAll('span').forEach((s, index) => {
+                    s.textContent = index < value ? '★' : '☆';
+                });
+                if (component.onChange) {
+                    component.onChange(this, value);
+                    component.userSetValue = value;
+                }
+            });
+
+            ratingContainer.appendChild(star);
+        }
+
+        componentElement.append(ratingContainer);
+        return componentElement;
+    }
+
+    renderCaptcha(component, componentElement) {
+        const captchaContainer = document.createElement('div');
+        captchaContainer.className = 'captcha-container';
+
+        // Generate and obfuscate captcha code
+        const captchaCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+        const obfuscatedCaptcha = captchaCode.split('').map(char => char + ' ').join('').trim();
+
+        const captchaDisplay = document.createElement('div');
+        captchaDisplay.className = 'captcha-display';
+        captchaDisplay.textContent = obfuscatedCaptcha;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Enter captcha';
+
+        const submitButton = document.createElement('button');
+        submitButton.textContent = 'Verify';
+        submitButton.style.gridColumn = "1 / span 2";
+        submitButton.addEventListener('click', () => {
+            if (input.value.toUpperCase() === captchaCode) {
+                alert('Captcha verified successfully!');
+                component.userSetValue = true;
+            } else {
+                alert('Incorrect captcha. Please try again.');
+                component.userSetValue = false;
+                input.value = '';
+            }
+        });
+
+        captchaContainer.append(captchaDisplay, input, submitButton);
+        componentElement.appendChild(captchaContainer);
+        return componentElement;
+    }
+
+
+    renderSignature(component, componentElement) {
+        const signatureContainer = document.createElement('div');
+        signatureContainer.className = 'signature-container';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 150;
+        const ctx = canvas.getContext('2d');
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#000000';
+
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        const buttonContainer = document.createElement('div');
+
+        const clearButton = document.createElement('button');
+        clearButton.textContent = 'Clear';
+        clearButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Save';
+        saveButton.addEventListener('click', () => {
+            const signatureData = canvas.toDataURL();
+            component.userSetValue = signatureData;
+            alert('Signature saved!');
+        });
+
+        buttonContainer.append(clearButton, saveButton);
+        signatureContainer.append(canvas, buttonContainer);
+        componentElement.appendChild(signatureContainer);
         return componentElement;
     }
 

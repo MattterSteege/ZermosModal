@@ -31,6 +31,12 @@
         .addSubmenu("type == \"bug\"", bugSubmissionSubModal)
         .addText("kan ik je via je mail ([email]) bereiken op als ik extra vragen heb of ontwikkelingen?")
         .addToggle("Ja hou me op de hoogte!")
+        .addSlider("test", 1, 10, 1, 6)
+        .addColorPicker("welke kleur", true, '#ff00ff', (ctx, color) => {console.log(color)})
+        .addFileUpload("upload bestand", false, "*", false, (ctx, file) => {console.log(file)})
+        .addRating("hoeveel sterren geef je Zermos?", false, 5, 1, (ctx, rating) => {console.log(rating)})
+        .addCaptcha("4t3esgfdg", true)
+        .addSignature()
 
 
     modal.open();
