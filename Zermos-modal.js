@@ -27,11 +27,11 @@
             if ((elem.required && (elem.userSetValue === "" || elem.userSetValue === null || elem.userSetValue === undefined)) && this.isInputType(elem.type)){
                 var notcorrect = document.querySelector('#' + elem.id);
                 correctForm = false;
-                values.push({type: elem.type, value: null, correct: false});
+                values.push({type: elem.type, id: elem.id, value: null, correct: false});
             }
             else if (this.isInputType(elem.type))
             {
-                var value = {type: elem.type, value: null, correct: true};
+                var value = {type: elem.type, id: elem.id, value: null, correct: true};
                 if (elem.userSetValue === "true" || elem.userSetValue === "false")
                     value.value = !!elem.userSetValue;
                 else if (elem.userSetValue === undefined)
