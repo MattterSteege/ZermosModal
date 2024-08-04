@@ -12,33 +12,38 @@
 
 <script>
     const ideaSubmissionSubModal = new ZermosSubModal()
-    .addHeading("Vertel eens, wat is jouw idee?")
-    .addTextArea("", true)
+    .addHeading("Vertel eens, wat is jouw idee?", "", 2)
+    .addTextArea(true)
 
     const bugSubmissionSubModal = new ZermosSubModal()
-        .addHeading("Vertel eens, wat is het probleem?")
-        .addTextArea("", true)
+        .addHeading("Vertel eens, wat is het probleem?", "", 2)
+        .addTextArea(true)
 
     const modal = new ZermosModal();
 
     modal.addHeading("Bug of idee?")
-        .addText("Heb je een bug gevonden in Zermos of heb je een baanbrekend idee, vul de korte vragenlijst hieronder!")
-        .addDropdown("Waar wil je me over bereiken?",[
-            { label: "Ik wil een bug rapporteren", value: "bug" },
-            { label: "Ik heb een idee voor Zermos", value: "idee" }
-        ], true, false, (ctx, value) => {modal.setCondition("type", value); console.log(ctx, value)})
-        .addSubmenu("type == \"idee\"", ideaSubmissionSubModal)
-        .addSubmenu("type == \"bug\"", bugSubmissionSubModal)
-        .addText("kan ik je via je mail ([email]) bereiken op als ik extra vragen heb of ontwikkelingen?")
-        .addToggle("Ja hou me op de hoogte!")
-        .addSlider("test", 1, 10, 1, 6)
-        .addColorPicker("welke kleur", true, '#ff00ff', (ctx, color) => {console.log(color)})
-        .addFileUpload("upload bestand", false, "*", false, (ctx, file) => {console.log(file)})
-        .addRating("hoeveel sterren geef je Zermos?", false, 5, 1, (ctx, rating) => {console.log(rating)})
-        .addCaptcha("4t3esgfdg", true)
-        .addSignature()
+    .addText("Heb je een bug gevonden in Zermos of heb je een baanbrekend idee, vul de korte vragenlijst hieronder!")
+    .addDropdown([
+        { label: "Ik wil een bug rapporteren", value: "bug" },
+        { label: "Ik heb een idee voor Zermos", value: "idee" }
+    ], true, false, (ctx, value) => {modal.setCondition("type", value); console.log(ctx, value)})
+    .addSubmenu("type == \"idee\"", ideaSubmissionSubModal)
+    .addSubmenu("type == \"bug\"", bugSubmissionSubModal)
+    .addText("kan ik je via je mail ([email]) bereiken op als ik extra vragen heb of ontwikkelingen?")
+    .addToggle("Ja hou me op de hoogte!")
+    .addButton("versturen", (ctx) => {
+            var values = ctx.getComponentsValue();
+            if (!((values.values[0].correct && values.values[1].correct) || (values.values[0].correct && values.values[2].correct))){
+                alert("form is not correct, fill in the form correctly!")
+                return;
+            }
 
+            console.log(values);
+    })
 
     modal.open();
+
+    //TODO: implement the form still being correct when a not-showing submodal's answers are not correct
+    //TODO: add a better label system (mostly for text elements)
 </script>
 </html>

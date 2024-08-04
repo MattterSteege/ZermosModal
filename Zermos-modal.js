@@ -21,11 +21,11 @@
         var correctForm = true;
         this.components.forEach((elem) => {
             if (elem.type === "submenu"){
-                console.log("submenu found, values are:", elem.subModal.getComponentsValue().values)
-                values.push(...elem.subModal.getComponentsValue().values)
+                var subValues = elem.subModal.getComponentsValue();
+                subValues.correct == false ? correctForm = false : null;
+                values.push(...subValues.values)
             }
             if ((elem.required && (elem.userSetValue === "" || elem.userSetValue === null || elem.userSetValue === undefined)) && this.isInputType(elem.type)){
-                var notcorrect = document.querySelector('#' + elem.id);
                 correctForm = false;
                 values.push({type: elem.type, id: elem.id, value: null, correct: false});
             }
@@ -90,12 +90,12 @@
     }
 
     ///INPUT ELEMENTS
-    addDatePicker(label, required = false, initialDate = new Date(), onChange = () => {}) {
-        return this.addComponent({ type: 'datePickerInput', label, required, initialDate, onChange });
+    addDatePicker(required = false, initialDate = new Date(), onChange = () => {}) {
+        return this.addComponent({ type: 'datePickerInput', required, initialDate, onChange });
     }
 
-    addDropdown(label, options, required = false, multiSelect = false, onChange = () => {}) {
-        return this.addComponent({ type: 'dropdownInput', label, options, required, multiSelect, onChange });
+    addDropdown(options, required = false, multiSelect = false, onChange = () => {}) {
+        return this.addComponent({ type: 'dropdownInput', options, required, multiSelect, onChange });
     }
 
     addSeparator(text = '') {
@@ -110,45 +110,45 @@
         return this.addComponent({ type: 'spacer', height });
     }
 
-    addNumberInput(label, required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = () => {}) {
-        return this.addComponent({ type: 'numberInput', label, required, initialValue, decimals, min, max, step, onChange });
+    addNumberInput(required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = () => {}) {
+        return this.addComponent({ type: 'numberInput', required, initialValue, decimals, min, max, step, onChange });
     }
 
-    addTextInput(label, required = false, initialValue = '', maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'textInput', label, required, initialValue, maxLength, onChange });
+    addTextInput(required = false, initialValue = '', maxLength = null, onChange = () => {}) {
+        return this.addComponent({ type: 'textInput', required, initialValue, maxLength, onChange });
     }
 
-    addPasswordInput(label, required = false, maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'passwordInput', label, required, maxLength, onChange });
+    addPasswordInput(required = false, maxLength = null, onChange = () => {}) {
+        return this.addComponent({ type: 'passwordInput', required, maxLength, onChange });
     }
 
-    addTextArea(label, required = false, initialValue = '', maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'textAreaInput', label, required, initialValue, maxLength, onChange });
+    addTextArea(required = false, initialValue = '', maxLength = null, onChange = () => {}) {
+        return this.addComponent({ type: 'textAreaInput', required, initialValue, maxLength, onChange });
     }
 
-    addCheckbox(label, initialState = false, onChange = () => {}) {
-        return this.addComponent({ type: 'toggleInput', label, state: initialState, asCheckbox: true, onChange });
+    addCheckbox(initialState = false, onChange = () => {}) {
+        return this.addComponent({ type: 'toggleInput', state: initialState, asCheckbox: true, onChange });
     }
 
     /// NEW
-    addSlider(label, min = 0, max = 100, step = 1, initialValue = 50, onChange = () => {}) {
-        return this.addComponent({ type: 'sliderInput', label, min, max, step, initialValue, onChange });
+    addSlider(min = 0, max = 100, step = 1, initialValue = 50, onChange = () => {}) {
+        return this.addComponent({ type: 'sliderInput', min, max, step, initialValue, onChange });
     }
 
-    addColorPicker(label, required, initialColor = '#000000', onChange = () => {}) {
-        return this.addComponent({ type: 'colorPickerInput', label, required, initialColor, onChange });
+    addColorPicker(required, initialColor = '#000000', onChange = () => {}) {
+        return this.addComponent({ type: 'colorPickerInput', required, initialColor, onChange });
     }
 
-    addFileUpload(label, required, accept = '*', multiple = false, onChange = () => {}) {
-        return this.addComponent({ type: 'fileUploadInput', label, required, accept, multiple, onChange });
+    addFileUpload(required, accept = '*', multiple = false, onChange = () => {}) {
+        return this.addComponent({ type: 'fileUploadInput', required, accept, multiple, onChange });
     }
 
-    addRating(label, required, maxRating = 5, initialRating = 0, onChange = () => {}) {
-        return this.addComponent({ type: 'ratingInput', label, required, maxRating, initialRating, onChange });
+    addRating(required, maxRating = 5, initialRating = 0, onChange = () => {}) {
+        return this.addComponent({ type: 'ratingInput', required, maxRating, initialRating, onChange });
     }
 
-    addCaptcha(siteKey, required) {
-        return this.addComponent({ type: 'captchaInput', siteKey, required });
+    addCaptcha(required) {
+        return this.addComponent({ type: 'captchaInput', required });
     }
 
     addSignature() {
@@ -509,7 +509,7 @@
         incrementButton.className = 'increment-button';
         incrementButton.textContent = '+';
 
-        numberInput.append(label, decrementButton, numberDisplay, incrementButton);
+        numberInput.append(decrementButton, numberDisplay, incrementButton);
 
         let value = component.initialValue;
 
@@ -1054,10 +1054,11 @@
     }
 
     evaluateExpression(expression) {
-        const comparisonMatch = expression.match(/^(\w+)\s*(==|!=|>|<|>=|<=)\s*(.+)$/);
+        const comparisonMatch = expression.match(/^(\w+)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
         if (!comparisonMatch) return false;
 
         const [_, key, operator, value] = comparisonMatch;
+        console.log(comparisonMatch)
         const conditionValue = this.conditions[key];
         const comparedValue = this.parseValue(value);
 
@@ -1078,7 +1079,7 @@
         if (value === 'false') return false;
         if (!isNaN(value)) return parseFloat(value);
         if (/^["'].*["']$/.test(value)) return value.slice(1, -1);
-        throw new Error('Unsupported value type');
+        throw new Error('Unsupported value type:' + value);
     }
 
     open() {
@@ -1093,6 +1094,6 @@
     }
 }
 
-class ZermosSubModal extends ZermosModal {
-    // Subclass for submenus, can override or add specific submenu behavior
-}
+
+// Subclass for submenus, can override or add specific submenu behavior
+class ZermosSubModal extends ZermosModal {}

@@ -1,298 +1,350 @@
-# ZermosModal
-
-ZermosModal is a lightweight, flexible JavaScript library for creating customizable modal dialogs and user interfaces. It provides an easy-to-use API for building complex modal structures with various UI components.
-
-This project is still being developed as a replacement for my current modal script that i'm using in multiple of my personal projects. So be ware that some components are still buggy and/or not really developed.
+# ZermosModal Library Documentation
 
 ## Table of Contents
+1. Introduction
+2. Class Overview
+3. Constructor
+4. Methods
+5. Component Types
+6. Conditions and Dynamic Rendering
+7. Tips and Tricks
+8. Examples
+    - Easy Example
+    - Medium Example
+    - Advanced Example
+9. Styling Guidelines
+10. Best Practices
+11. Troubleshooting
 
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Conditional Rendering](#Condition-Handling-Methods)
-- [Examples](#usage-example)
-- [Contributing](#contributing)
-- [License](#license)
+## 1. Introduction
 
-## Features
+ZermosModal is a versatile JavaScript library for creating interactive and dynamic modal interfaces. It provides a flexible way to build complex forms, surveys, and interactive UI components with various input types and conditional rendering capabilities.
 
-- Easy-to-use API for creating modal dialogs
-- Wide range of UI components (buttons, toggles, dropdowns, etc.)
-- Conditional rendering of components
-- Customizable styling
-- Submodal support for nested interfaces
+## 2. Class Overview
 
-## Installation
+The library consists of two main classes:
+- `ZermosModal`: The primary class for creating and managing modal interfaces.
+- `ZermosSubModal`: A subclass of ZermosModal, specifically designed for nested submenus within a modal. `class ZermosSubModal extends ZermosModal {}`: is a literal clone only used for easier to read code!
 
-To use ZermosModal in your project, include the `ZermosModal.js` file in your HTML:
-
-```html
-<script src="path/to/ZermosModal.js"></script>
-```
-
-## Usage
-
-# ZermosModal Class Documentation
-
-## Class Overview
-
-The `ZermosModal` class is a JavaScript implementation for creating and managing modal dialogs with various UI components. It provides methods for adding different types of components, handling conditions, and rendering the modal.
-
-## Constructor
+## 3. Constructor
 
 ```javascript
 constructor(components = [], conditions = {})
 ```
 
-- `components` (optional): An array of component objects (default: empty array)
-- `conditions` (optional): An object of key-value pairs for conditional rendering (default: empty object)
+- `components`: An array of component objects that define the modal's content.
+- `conditions`: An object containing key-value pairs for conditional rendering.
 
-## Methods
+I don't recommend initializing a modal with params set, it is mostly used internally for the `deepCopy()` function
 
-### Component Addition Methods
+## 4. Methods
 
-Note: All component addition methods return `this` for method chaining unless otherwise specified.
+### 4.1 Adding Components
 
-1. `addComponent(component)`
-    - Adds a generic component to the modal
+- `addComponent(component)`: Adds a component to the modal. **Meant for internal use only!**
 
-2. `addHeading(text, subheading = "", level = 1)`
-    - Adds a heading component
-    - Parameters:
-        - `text`: Main heading text
-        - `subheading` (optional): Subheading text
-        - `level` (optional): Heading level (1-6)
+- `addHeading(text, subheading = "", level = 1)`: Adds a heading component.
 
-3. `addToggle(label, initialState = false, onChange)`
-    - Adds a toggle switch component
-    - Parameters:
-        - `label`: Label for the toggle
-        - `initialState` (optional): Initial state of the toggle (true/false)
-        - `onChange` (optional): Callback function when toggle state changes
-            - Called with two arguments: `(modalInstance, isActive)`
-            - `modalInstance`: The current ZermosModal instance
-            - `isActive`: Boolean indicating the new state of the toggle
+- `addToggle(label, initialState = false, onChange = (modal, isActive) => {})`: Adds a toggle switch.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `isActive`: Boolean indicating the new state of the toggle.
 
-4. `addButton(text, onClick)`
-    - Adds a button component
-    - Parameters:
-        - `text`: Button text
-        - `onClick` (optional): Callback function when button is clicked
-            - Called with one argument: `(modalInstance)`
-            - `modalInstance`: The current ZermosModal instance
+- `addButton(text, onClick = (modal) => {})`: Adds a button.
+   - `onClick`: Callback function invoked with one parameter:
+      - `modal`: The current modal instance.
 
-5. `addDoubleButtons(text, secondText, onClick, secondOnClick)`
-    - Adds two button components side by side
-    - Parameters:
-        - `text`: First button text
-        - `secondText`: Second button text
-        - `onClick` (optional): Callback for first button
-        - `secondOnClick` (optional): Callback for second button
-    - Both callbacks are called with `(modalInstance)` as argument
+- `addDoubleButtons(text, secondText, onClick = (modal) => {}, secondOnClick = (modal) => {})`: Adds two buttons side by side.
+   - Both `onClick` and `secondOnClick`: Callback functions invoked with one parameter:
+      - `modal`: The current modal instance.
 
-6. `addTripleButtons(text, secondText, thirdText, onClick, secondOnClick, thirdOnClick)`
-    - Adds three button components side by side
-    - Parameters:
-        - `text`, `secondText`, `thirdText`: Button texts
-        - `onClick`, `secondOnClick`, `thirdOnClick` (all optional): Respective callbacks
-    - All callbacks are called with `(modalInstance)` as argument
+- `addTripleButtons(text, secondText, thirdText, onClick = (modal) => {}, secondOnClick = (modal) => {}, thirdOnClick = (modal) => {})`: Adds three buttons side by side.
+   - All three callbacks (`onClick`, `secondOnClick`, `thirdOnClick`): Invoked with one parameter:
+      - `modal`: The current modal instance.
 
-7. `addSubmenu(showCondition, subModal)`
-    - Adds a submenu component
-    - Parameters:
-        - `showCondition`: Condition for showing the submenu
-        - `subModal`: Instance of ZermosSubModal
+- `addSubmenu(showCondition, subModal)`: Adds a submenu component.
 
-8. `addText(text)`
-    - Adds a text component
-    - Parameters:
-        - `text`: Text content
+- `addText(text)`: Adds a text component.
 
-9. `addUrl(url, showFull = false, copyButton = true)`
-    - Adds a URL component
-    - Parameters:
-        - `url`: URL to display
-        - `showFull` (optional): Whether to show full URL or just pathname
-        - `copyButton` (optional): Whether to include a copy button
+- `addUrl(url, showFull = false, copyButton = true)`: Adds a URL component with optional copy functionality.
 
-10. `addDatePicker(label, initialDate = new Date(), onChange)`
-    - Adds a date picker component
-    - Parameters:
-        - `label`: Label for the date picker
-        - `initialDate` (optional): Initial date (default: current date)
-        - `onChange` (optional): Callback when date changes
-            - Called with two arguments: `(modalInstance, selectedDate)`
-            - `modalInstance`: The current ZermosModal instance
-            - `selectedDate`: The newly selected Date object
+- `addDatePicker(required = false, initialDate = new Date(), onChange = (modal, selectedDate) => {})`: Adds a date picker.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `selectedDate`: The Date object representing the selected date.
 
-11. `addDropdown(label, options, multiSelect = false, onChange)`
-    - Adds a dropdown component
-    - Parameters:
-        - `label`: Label for the dropdown
-        - `options`: Array of options
-        - `multiSelect` (optional): Whether multiple options can be selected
-        - `onChange` (optional): Callback when selection changes
-            - Called with two arguments: `(modalInstance, selectedOptions)`
-            - `modalInstance`: The current ZermosModal instance
-            - `selectedOptions`: Array of selected options (or single option if `multiSelect` is false)
+- `addDropdown(options, required = false, multiSelect = false, onChange = (modal, selectedValue) => {})`: Adds a dropdown component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `selectedValue`: The selected value (or array of values if `multiSelect` is true).
 
-12. `addSeparator(text = '')`
-    - Adds a separator component
-    - Parameters:
-        - `text` (optional): Text for the separator
+- `addSeparator(text = '')`: Adds a separator line with optional text.
 
-13. `addImage(src, alt = '')`
-    - Adds an image component
-    - Parameters:
-        - `src`: Image source URL
-        - `alt` (optional): Alternative text for the image
+- `addImage(src, alt = '')`: Adds an image component.
 
-14. `addSpacer(height = "20px")`
-    - Adds a spacer component
-    - Parameters:
-        - `height` (optional): Height of the spacer (CSS value)
+- `addSpacer(height = "20px")`: Adds vertical space between components.
 
-15. `addNumberInput(label, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange)`
-    - Adds a number input component
-    - Parameters:
-        - `label`: Label for the input
-        - `initialValue` (optional): Initial numeric value
-        - `decimals` (optional): Number of decimal places
-        - `min`, `max` (optional): Minimum and maximum allowed values
-        - `step` (optional): Step value for increments/decrements
-        - `onChange` (optional): Callback when value changes
-            - Called with two arguments: `(modalInstance, newValue)`
-            - `modalInstance`: The current ZermosModal instance
-            - `newValue`: The new numeric value of the input
+- `addNumberInput(required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = (modal, value) => {})`: Adds a number input component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `value`: The current numeric value of the input.
 
-16. `addTextInput(label, initialValue = '', maxLength = null, onChange)`
-    - Adds a text input component
-    - Parameters:
-        - `label`: Label for the input
-        - `initialValue` (optional): Initial text value
-        - `maxLength` (optional): Maximum allowed length of input
-        - `onChange` (optional): Callback when text changes
-            - Called with two arguments: `(modalInstance, newText)`
-            - `modalInstance`: The current ZermosModal instance
-            - `newText`: The new text value of the input
+- `addTextInput(required = false, initialValue = '', maxLength = null, onChange = (modal, value) => {})`: Adds a text input component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `value`: The current text value of the input.
 
-17. `addPasswordInput(label, maxLength = null, onChange)`
-    - Adds a password input component
-    - Parameters:
-        - `label`: Label for the input
-        - `maxLength` (optional): Maximum allowed length of input
-        - `onChange` (optional): Callback when password changes
-            - Called with two arguments: `(modalInstance, newPassword)`
-            - `modalInstance`: The current ZermosModal instance
-            - `newPassword`: The new password value
+- `addPasswordInput(required = false, maxLength = null, onChange = (modal, value) => {})`: Adds a password input component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `value`: The current password value (as plain text).
 
-18. `addTextArea(label, initialValue = '', maxLength = null, onChange)`
-    - Adds a text area component
-    - Parameters:
-        - `label`: Label for the text area
-        - `initialValue` (optional): Initial text value
-        - `maxLength` (optional): Maximum allowed length of input
-        - `onChange` (optional): Callback when text changes
-            - Called with two arguments: `(modalInstance, newText)`
-            - `modalInstance`: The current ZermosModal instance
-            - `newText`: The new text value of the text area
+- `addTextArea(required = false, initialValue = '', maxLength = null, onChange = (modal, value) => {})`: Adds a text area component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `value`: The current text value of the textarea.
 
-### Rendering and Display Methods
+- `addCheckbox(initialState = false, onChange = (modal, isChecked) => {})`: Adds a checkbox component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `isChecked`: Boolean indicating whether the checkbox is checked.
 
-1. `render()`
-    - Renders all components and returns the modal element
-    - Returns: DOM element representing the entire modal
+- `addSlider(min = 0, max = 100, step = 1, initialValue = 50, onChange = (modal, value) => {})`: Adds a slider component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `value`: The current numeric value of the slider.
 
-2. `renderComponent(component)`
-    - Renders a single component
-    - Parameters:
-        - `component`: Component object to render
-    - Returns: DOM element for the rendered component
+- `addColorPicker(required, initialColor = '#000000', onChange = (modal, color) => {})`: Adds a color picker component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `color`: The selected color as a hexadecimal string (e.g., "#FF0000").
 
-3. `open()`
-    - Renders the modal and appends it to the document body
+- `addFileUpload(required, accept = '*', multiple = false, onChange = (modal, files) => {})`: Adds a file upload component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `files`: A FileList object containing the selected file(s).
 
-### Condition Handling Methods
+- `addRating(required, maxRating = 5, initialRating = 0, onChange = (modal, rating) => {})`: Adds a star rating component.
+   - `onChange`: Callback function invoked with two parameters:
+      - `modal`: The current modal instance.
+      - `rating`: The selected rating as a number.
 
-1. `setCondition(key, value)`
-    - Sets a condition for conditional rendering
-    - Parameters:
-        - `key`: Condition identifier
-        - `value`: Condition value
+- `addCaptcha(required)`: Adds a CAPTCHA component.
+   - Note: This method doesn't have an `onChange` callback. The CAPTCHA verification is handled internally.
 
-2. `updateRenderedModal()`
-    - Updates the rendered modal based on current conditions
+- `addSignature()`: Adds a signature pad component.
+   - Note: This method doesn't have an `onChange` callback. The signature data is saved internally when the user clicks the "Save" button.
+   - 
+### 4.2 Rendering and Management
 
-3. `evaluateExpression(expression)`
-    - Evaluates a conditional expression
-    - Parameters:
-        - `expression`: String representing a condition
-    - Returns: Boolean result of the evaluation
+- `render()`: Renders the modal and returns the DOM element. **Meant for internal use only!**
+- `open()`: Opens the modal by appending it to the document body.
+- `setCondition(key, value)`: Sets a condition for conditional rendering.
+- `getComponentsValue()`: Retrieves the values of all components in the modal.
+- `deepCopy()`: Creates a deep copy of the modal instance.
 
-### Utility Methods
+## 5. Component Types
 
-1. `deepCopy()`
-    - Creates a deep copy of the modal instance
-    - Returns: New ZermosModal instance with copied components and conditions
+The library supports various component types, each with specific properties and behaviors:
 
-## ZermosSubModal Class
+- Heading
+- Toggle Switch
+- Button
+- Double Buttons
+- Triple Buttons
+- Submenu
+- Text
+- URL
+- Date Picker
+- Dropdown
+- Separator
+- Image
+- Spacer
+- Number Input
+- Text Input
+- Password Input
+- Text Area
+- Checkbox
+- Slider
+- Color Picker
+- File Upload
+- Rating
+- CAPTCHA
+- Signature Pad
 
-A subclass of ZermosModal, potentially for use with submenu components. Currently, it doesn't add any additional functionality beyond what ZermosModal provides.
+## 6. Conditions and Dynamic Rendering
 
-## Usage Example
+The library supports conditional rendering of components based on user-defined conditions. Use the `setCondition` method to update condition values and trigger re-rendering of conditional components.
+
+## 7. Tips and Tricks
+
+1. Nested Modals: Use `ZermosSubModal` for creating nested modal structures. This doesn't do anything specific to the generated modal, it is just easier to read in your code if it is a submodal.
+2. Chaining: Most methods return `this`, allowing for method chaining when adding components.
+3. Custom Styling: Use CSS to customize the appearance of modal components.
+4. Validation: Implement custom validation logic in the `onChange` callbacks of input components.
+5. Dynamic Updates: Use the `setCondition` method to dynamically update the modal's content based on user interactions.
+6. Accessibility: Ensure proper labeling and ARIA attributes for better accessibility.
+7. Mobile Responsiveness: Test and adjust the modal layout for various screen sizes.
+
+## 8. Examples
+
+### Easy Example: Simple Contact Form
 
 ```javascript
-const modal = new ZermosModal();
-modal.addHeading("Welcome")
-    .addText("This is a sample modal")
-    .addButton("Click me", (modal) => console.log("Button clicked in", modal))
-    .addToggle("Enable feature", false, (modal, isEnabled) => console.log("Toggle:", isEnabled))
-    .addNumberInput("Enter a number", 0, 2, 0, 100, 1, (modal, value) => console.log("Number input:", value))
-    .open();
+const contactForm = new ZermosModal()
+  .addHeading("Contact Us", "We'd love to hear from you!")
+  .addTextInput(true, "", null, (modal, value) => console.log("Name:", value))
+  .addTextInput(true, "", null, (modal, value) => console.log("Email:", value))
+  .addTextArea(false, "", null, (modal, value) => console.log("Message:", value))
+  .addButton("Submit", (modal) => {
+    console.log("Form submitted!");
+    // Add form submission logic here
+  });
+
+contactForm.open();
 ```
 
-This example creates a modal with a heading, some text, a button, a toggle switch, and a number input, then opens the modal. It demonstrates the usage of `onChange` callbacks for different components.
-
-Here's a more complex example demonstrating various features:
+### Medium Example: Quiz with Conditional Questions
 
 ```javascript
-const modal = new ZermosModal();
+const quiz = new ZermosModal()
+  .addHeading("Geography Quiz")
+  .addDropdown(
+    [
+      { label: "Europe", value: "europe" },
+      { label: "Asia", value: "asia" },
+      { label: "Africa", value: "africa" }
+    ],
+    true,
+    false,
+    (modal, value) => modal.setCondition("continent", value)
+  )
+  .addSubmenu("continent == 'europe'", new ZermosSubModal()
+    .addHeading("European Capital", "", 2)
+    .addTextInput(true, "", null, (modal, value) => console.log("European capital:", value))
+  )
+  .addSubmenu("continent == 'asia'", new ZermosSubModal()
+    .addHeading("Asian Language", "", 2)
+    .addDropdown(
+      [
+        { label: "Mandarin", value: "mandarin" },
+        { label: "Hindi", value: "hindi" },
+        { label: "Japanese", value: "japanese" }
+      ],
+      true,
+      false,
+      (modal, value) => console.log("Asian language:", value)
+    )
+  )
+  .addSubmenu("continent == 'africa'", new ZermosSubModal()
+    .addHeading("African Animal", "", 2)
+    .addTextInput(true, "", null, (modal, value) => console.log("African animal:", value))
+  )
+  .addButton("Submit Quiz", (modal) => {
+    console.log("Quiz submitted:", modal.getComponentsValue());
+  });
 
-modal.addHeading("User Registration")
-    .addText("Please fill out the form below:")
-    .addTextInput("Username", "", 20, (modal, value) => console.log(`Username: ${value}`))
-    .addPasswordInput("Password", 20, (modal, value) => console.log(`Password set`))
-    .addDatePicker("Date of Birth", new Date(), (modal, date) => console.log(`DoB: ${date}`))
-    .addDropdown("Country", [
-        { label: "USA", value: "us" },
-        { label: "Canada", value: "ca" },
-        { label: "UK", value: "uk" }
-    ], false, (modal, selected) => console.log(`Country: ${selected}`))
-    .addToggle("Subscribe to newsletter", false, (modal, state) => console.log(`Subscribed: ${state}`))
-    .addButton("Register", () => {
-        // Registration logic
-        console.log("Registration submitted");
-    });
-
-modal.open();
+quiz.open();
 ```
 
-## Contributing
+### Advanced Example: Complex Survey with Multiple Question Types and Dynamic Rendering
 
-Contributions to ZermosModal are welcome! Please follow these steps:
+```javascript
+const survey = new ZermosModal()
+  .addHeading("Customer Satisfaction Survey")
+  .addText("Please answer the following questions to help us improve our services.")
+  .addRating(true, 5, 0, (modal, value) => {
+    modal.setCondition("satisfaction", value);
+    console.log("Overall satisfaction:", value);
+  })
+  .addSubmenu("satisfaction <= 3", new ZermosSubModal()
+    .addHeading("We're sorry to hear that. What went wrong?", "", 2)
+    .addTextArea(true, "", null, (modal, value) => console.log("Negative feedback:", value))
+  )
+  .addSubmenu("satisfaction > 3", new ZermosSubModal()
+    .addHeading("Great! What did you enjoy most?", "", 2)
+    .addTextArea(false, "", null, (modal, value) => console.log("Positive feedback:", value))
+  )
+  .addHeading("Product Preferences", "", 2)
+  .addDropdown(
+    [
+      { label: "Electronics", value: "electronics" },
+      { label: "Clothing", value: "clothing" },
+      { label: "Food", value: "food" }
+    ],
+    true,
+    true,
+    (modal, values) => {
+      modal.setCondition("preferences", values);
+      console.log("Product preferences:", values);
+    }
+  )
+  .addSubmenu("preferences.includes('electronics')", new ZermosSubModal()
+    .addHeading("Electronics Preferences", "", 3)
+    .addCheckbox(false, (modal, value) => console.log("Interested in smartphones:", value))
+    .addText("Interested in smartphones")
+    .addCheckbox(false, (modal, value) => console.log("Interested in laptops:", value))
+    .addText("Interested in laptops")
+  )
+  .addSubmenu("preferences.includes('clothing')", new ZermosSubModal()
+    .addHeading("Clothing Preferences", "", 3)
+    .addColorPicker(false, "#000000", (modal, value) => console.log("Favorite color:", value))
+    .addText("Select your favorite color")
+  )
+  .addSubmenu("preferences.includes('food')", new ZermosSubModal()
+    .addHeading("Food Preferences", "", 3)
+    .addSlider(1, 10, 1, 5, (modal, value) => console.log("Spiciness preference:", value))
+    .addText("Spiciness preference (1-10)")
+  )
+  .addHeading("Additional Information", "", 2)
+  .addDatePicker(false, new Date(), (modal, value) => console.log("Preferred delivery date:", value))
+  .addFileUpload(false, "image/*", false, (modal, files) => console.log("Uploaded files:", files))
+  .addText("Upload a profile picture (optional)")
+  .addSignature()
+  .addText("Please sign to confirm your responses")
+  .addButton("Submit Survey", (modal) => {
+    const results = modal.getComponentsValue();
+    console.log("Survey results:", results);
+    // Process and submit survey results
+  });
 
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature-branch-name`
-3. Make your changes and commit them: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature-branch-name`
-5. Create a pull request
+survey.open();
+```
 
-Please ensure your code adheres to the existing style and includes appropriate tests.
+## 9. Styling Guidelines
 
-## License
+The ZermosModal library provides basic styling, but you can customize the appearance using CSS. Here are some key classes to target:
 
-[MIT License](https://opensource.org/licenses/MIT)
+- `.zermos-modal`: The main modal container
+- `.heading`, `.subheading`: Heading elements
+- `.toggle-switch`: Toggle switch container
+- `.dropdown`: Dropdown container
+- `.slider-container`: Slider container
+- `.color-picker-container`: Color picker container
+- `.file-upload-container`: File upload container
+- `.rating-container`: Rating component container
+- `.captcha-container`: CAPTCHA container
+- `.signature-container`: Signature pad container
 
----
+## 10. Best Practices
 
-For more information or support, please open an issue on the GitHub repository.
+1. Organize complex forms into logical sections using headings and separators.
+2. Use conditional rendering to create dynamic, responsive forms.
+3. Implement proper error handling and validation for user inputs.
+4. Provide clear instructions and labels for each input component.
+5. Use appropriate input types for different kinds of data (e.g., number input for numerical values).
+6. Implement a clear submission process and provide feedback to users.
+7. Consider using submodals for grouping related questions or for multi-step forms.
+8. Optimize performance by lazy-loading complex components or large datasets.
+9. Ensure your modal is accessible by using proper ARIA attributes and keyboard navigation.
+10. Test your modal thoroughly across different devices and browsers.
+
+## 11. Troubleshooting
+
+- If components are not rendering correctly, check that you're using the correct method to add each component type.
+- For issues with conditional rendering, verify that your condition expressions are correctly formatted and that you're using `setCondition` to update values.
+- If the modal is not opening, ensure that you're calling the `open()` method after adding all components.
+- For performance issues with large forms, consider breaking the content into multiple submodals or implementing pagination.
+- If custom styling is not applied, check that your CSS selectors are correctly targeting the modal components.
+
+By following this documentation, you should be able to create complex, interactive modal interfaces using the ZermosModal library. Remember to experiment with different component combinations and leverage the conditional rendering features to create dynamic and responsive user interfaces.
