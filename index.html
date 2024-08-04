@@ -26,7 +26,7 @@
     .addDropdown([
         { label: "Ik wil een bug rapporteren", value: "bug" },
         { label: "Ik heb een idee voor Zermos", value: "idee" }
-    ], true, false, (ctx, value) => {modal.setCondition("type", value); console.log(ctx, value)})
+    ], true, false, (ctx, value) => modal.setCondition("type", value))
     .addSubmenu("type == \"idee\"", ideaSubmissionSubModal)
     .addSubmenu("type == \"bug\"", bugSubmissionSubModal)
     .addText("kan ik je via je mail ([email]) bereiken op als ik extra vragen heb of ontwikkelingen?")

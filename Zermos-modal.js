@@ -1058,7 +1058,6 @@
         if (!comparisonMatch) return false;
 
         const [_, key, operator, value] = comparisonMatch;
-        console.log(comparisonMatch)
         const conditionValue = this.conditions[key];
         const comparedValue = this.parseValue(value);
 
