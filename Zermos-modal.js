@@ -2,6 +2,7 @@
     constructor(components = [], conditions = {}) {
         this.components = components;
         this.conditions = conditions;
+        this.close();
     }
 
     addComponent(component) {
@@ -139,20 +140,8 @@
         return this.addComponent({ type: 'colorPickerInput', required, initialColor, onChange });
     }
 
-    addFileUpload(required, accept = '*', multiple = false, onChange = () => {}) {
-        return this.addComponent({ type: 'fileUploadInput', required, accept, multiple, onChange });
-    }
-
     addRating(required, maxRating = 5, initialRating = 0, onChange = () => {}) {
         return this.addComponent({ type: 'ratingInput', required, maxRating, initialRating, onChange });
-    }
-
-    addCaptcha(required) {
-        return this.addComponent({ type: 'captchaInput', required });
-    }
-
-    addSignature() {
-        return this.addComponent({ type: 'signatureInput' });
     }
 
     render() {
@@ -189,10 +178,7 @@
             textAreaInput: this.renderTextArea,
             sliderInput: this.renderSlider,
             colorPickerInput: this.renderColorPicker,
-            fileUploadInput: this.renderFileUpload,
             ratingInput: this.renderRating,
-            captchaInput: this.renderCaptcha,
-            signatureInput: this.renderSignature,
         };
 
         const renderMethod = renderMethods[component.type] || this.renderDefault;
@@ -209,7 +195,7 @@
     }
 
     renderButton(component, componentElement) {
-        const buttonElement = document.createElement("button");
+        const buttonElement = document.createElement("div");
         buttonElement.innerText = component.text;
         buttonElement.onclick = () => component.onClick(this);
         componentElement.appendChild(buttonElement);
@@ -217,11 +203,11 @@
     }
 
     renderDoubleButton(component, componentElement) {
-        const button1= document.createElement("button");
+        const button1= document.createElement("div");
         button1.innerText = component.text;
         button1.onclick = () => component.onClick(this);
 
-        const button2 = document.createElement("button");
+        const button2 = document.createElement("div");
         button2.innerText = component.secondText;
         button2.onclick = () => component.secondOnClick(this);
 
@@ -230,15 +216,15 @@
     }
 
     renderTripleButton(component, componentElement) {
-        const button1 = document.createElement("button");
+        const button1 = document.createElement("div");
         button1.innerText = component.text;
         button1.onclick = () => component.onClick(this);
 
-        const button2 = document.createElement("button");
+        const button2 = document.createElement("div");
         button2.innerText = component.secondText;
         button2.onclick = () => component.secondOnClick(this);
 
-        const button3 = document.createElement("button");
+        const button3 = document.createElement("div");
         button3.innerText = component.thirdText;
         button3.onclick = () => component.thirdOnClick(this);
 
@@ -294,13 +280,13 @@
 
         const urlField = document.createElement('div');
         urlField.className = 'url-field';
-        urlField.textContent = component.showFull ? component.url : new URL(component.url).pathname;
+        urlField.textContent = component.showFull ? component.url : (new URL(component.url).pathname + new URL(component.url).search);
         urlField.contentEditable = !component.copyButton;
 
         if (component.copyButton) {
-            const copyButton = document.createElement('button');
-            copyButton.className = 'copy';
-            copyButton.textContent = 'Copy';
+            const copyButton = document.createElement('div');
+            copyButton.className = 'copy button';
+            copyButton.textContent = 'Kopieer';
 
             copyButton.addEventListener('click', () => {
                 navigator.clipboard.writeText(component.url)
@@ -347,14 +333,12 @@
 
         const calendarElem = document.createElement('div');
         calendarElem.className = 'calendar';
-        calendarElem.style.display = "none";
-        datepicker.appendChild(calendarElem);
 
         const calendarHeader = document.createElement('div');
         calendarHeader.className = 'calendar-header';
         calendarElem.appendChild(calendarHeader);
 
-        const prevMonthButton = document.createElement('button');
+        const prevMonthButton = document.createElement('div');
         prevMonthButton.className = 'prev-month';
         prevMonthButton.textContent = '<';
         calendarHeader.appendChild(prevMonthButton);
@@ -363,7 +347,7 @@
         monthYearElem.className = 'month-year';
         calendarHeader.appendChild(monthYearElem);
 
-        const nextMonthButton = document.createElement('button');
+        const nextMonthButton = document.createElement('div');
         nextMonthButton.className = 'next-month';
         nextMonthButton.textContent = '>';
         calendarHeader.appendChild(nextMonthButton);
@@ -373,6 +357,7 @@
         calendarElem.appendChild(calendarBody);
 
         componentElement.appendChild(datepicker);
+        componentElement.appendChild(calendarElem);
 
         let selectedDate = component.initialDate;
         let currentMonth = selectedDate.getMonth();
@@ -399,7 +384,6 @@
                 dayElem.addEventListener('click', () => {
                     selectedDate = new Date(year, month, day);
                     selectedDateElem.textContent = selectedDate.toDateString();
-                    calendarElem.style.display = 'none';
                     renderCalendar(currentMonth, currentYear);
                     if (component.onChange) {
                         component.onChange(this, selectedDate);
@@ -410,9 +394,9 @@
             }
         };
 
-        selectedDateElem.addEventListener('click', () => {
-            calendarElem.style.display = calendarElem.style.display === 'none' ? 'block' : 'none';
+        datepicker.addEventListener('click', () => {
             datepicker.classList.toggle("selected");
+            calendarElem.classList.toggle("show");
         });
 
         prevMonthButton.addEventListener('click', () => {
@@ -445,7 +429,7 @@
         const dropdownElement = document.createElement('div');
         dropdownElement.classList.add('dropdown');
 
-        const dropdownButton = document.createElement('button');
+        const dropdownButton = document.createElement('div');
         dropdownButton.classList.add('dropdown-button');
         dropdownButton.innerText = 'Select...';
 
@@ -457,6 +441,7 @@
             optionElement.classList.add('dropdown-option');
             optionElement.innerText = option.label;
             optionElement.dataset.value = option.value;
+            optionElement.dataset.label = option.label;
 
             optionElement.addEventListener('click', () => {
                 if (component.multiSelect) {
@@ -470,7 +455,11 @@
                     .filter(child => child.classList.contains('selected'))
                     .map(child => child.dataset.value);
 
-                dropdownButton.innerText = selectedOptions.length ? selectedOptions.join(", ") : "Select...";
+                const selectedOptionsLabels = Array.from(dropdownMenu.children)
+                    .filter(child => child.classList.contains('selected'))
+                    .map(child => child.dataset.label);
+
+                dropdownButton.innerText = selectedOptionsLabels.length ? selectedOptionsLabels.join(", ") : "Select...";
 
                 if (component.onChange) {
                     component.onChange(this, component.multiSelect ? selectedOptions : selectedOptions[0]);
@@ -497,7 +486,7 @@
         const numberInput = document.createElement('div');
         numberInput.className = 'number-input';
 
-        const decrementButton = document.createElement('button');
+        const decrementButton = document.createElement('div');
         decrementButton.className = 'decrement-button';
         decrementButton.textContent = '-';
 
@@ -505,7 +494,7 @@
         numberDisplay.contentEditable = 'true';
         numberDisplay.className = 'display';
 
-        const incrementButton = document.createElement('button');
+        const incrementButton = document.createElement('div');
         incrementButton.className = 'increment-button';
         incrementButton.textContent = '+';
 
@@ -642,9 +631,10 @@
         const textAreaElementInput = document.createElement('div');
         textAreaElementInput.className = 'textarea-element-input';
 
-        const textDisplay = document.createElement('div');
+        const textDisplay = document.createElement('span');
         textDisplay.contentEditable = 'true';
         textDisplay.className = 'display';
+        textDisplay.role = 'textbox';
         textDisplay.textContent = component.initialValue;
 
         textAreaElementInput.append(textDisplay);
@@ -889,28 +879,6 @@
         return componentElement;
     }
 
-
-    renderFileUpload(component, componentElement) {
-        const fileUploadContainer = document.createElement('div');
-        fileUploadContainer.className = 'file-upload-container';
-
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = component.accept;
-        fileInput.multiple = component.multiple;
-
-        fileInput.addEventListener('change', (e) => {
-            if (component.onChange) {
-                component.onChange(this, e.target.files);
-                component.userSetValue = e.target.files;
-            }
-        });
-
-        fileUploadContainer.append(fileInput);
-        componentElement.appendChild(fileUploadContainer);
-        return componentElement;
-    }
-
     renderDefault(component, componentElement) {
         componentElement.innerText = `couldn't render component of type: ${component.type}`;
         return componentElement;
@@ -944,102 +912,6 @@
         }
 
         componentElement.append(ratingContainer);
-        return componentElement;
-    }
-
-    renderCaptcha(component, componentElement) {
-        const captchaContainer = document.createElement('div');
-        captchaContainer.className = 'captcha-container';
-
-        // Generate and obfuscate captcha code
-        const captchaCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-        const obfuscatedCaptcha = captchaCode.split('').map(char => char + ' ').join('').trim();
-
-        const captchaDisplay = document.createElement('div');
-        captchaDisplay.className = 'captcha-display';
-        captchaDisplay.textContent = obfuscatedCaptcha;
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = 'Enter captcha';
-
-        const submitButton = document.createElement('button');
-        submitButton.textContent = 'Verify';
-        submitButton.style.gridColumn = "1 / span 2";
-        submitButton.addEventListener('click', () => {
-            if (input.value.toUpperCase() === captchaCode) {
-                alert('Captcha verified successfully!');
-                component.userSetValue = true;
-            } else {
-                alert('Incorrect captcha. Please try again.');
-                component.userSetValue = false;
-                input.value = '';
-            }
-        });
-
-        captchaContainer.append(captchaDisplay, input, submitButton);
-        componentElement.appendChild(captchaContainer);
-        return componentElement;
-    }
-
-
-    renderSignature(component, componentElement) {
-        const signatureContainer = document.createElement('div');
-        signatureContainer.className = 'signature-container';
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 150;
-        const ctx = canvas.getContext('2d');
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#000000';
-
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
-
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-        function startDrawing(e) {
-            isDrawing = true;
-            [lastX, lastY] = [e.offsetX, e.offsetY];
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-            [lastX, lastY] = [e.offsetX, e.offsetY];
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        const buttonContainer = document.createElement('div');
-
-        const clearButton = document.createElement('button');
-        clearButton.textContent = 'Clear';
-        clearButton.addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-
-        const saveButton = document.createElement('button');
-        saveButton.textContent = 'Save';
-        saveButton.addEventListener('click', () => {
-            const signatureData = canvas.toDataURL();
-            component.userSetValue = signatureData;
-            alert('Signature saved!');
-        });
-
-        buttonContainer.append(clearButton, saveButton);
-        signatureContainer.append(canvas, buttonContainer);
-        componentElement.appendChild(signatureContainer);
         return componentElement;
     }
 
@@ -1083,7 +955,27 @@
 
     open() {
         const modalElement = this.render();
-        document.body.appendChild(modalElement);
+
+        const modalBackground = document.createElement('div');
+        modalBackground.className = 'zermos-modal-background';
+        modalBackground.addEventListener('click', (e) => {
+            if (e.target === modalBackground) this.close();
+        });
+        modalBackground.style.opacity = 0;
+
+        //.zermos-modal-container
+        const modalContainer = document.createElement('div');
+        modalContainer.className = 'zermos-modal-container';
+
+        modalContainer.appendChild(modalElement);
+        modalBackground.appendChild(modalContainer);
+        document.body.appendChild(modalBackground);
+
+        ease(0, 1, 250, opacity => modalBackground.style.opacity = opacity);
+    }
+
+    close() {
+        document.querySelectorAll('.zermos-modal-background').forEach(modal => modal.remove());
     }
 
     deepCopy() {
@@ -1096,3 +988,34 @@
 
 // Subclass for submenus, can override or add specific submenu behavior
 class ZermosSubModal extends ZermosModal {}
+
+function unloadModal() {
+    var modal = document.querySelector('.zermos-modal-background');
+    if (modal) {
+        ease(1, 0, 250, opacity => modal.style.opacity = opacity);
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+function ease(start, end, time, callback) {
+    start = Number(start);
+    end = Number(end);
+    const startTime = Date.now();
+    const duration = time;
+
+    function update() {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+
+        if (elapsed >= duration) {
+            callback(end);
+        } else {
+            const progress = elapsed / duration;
+            const easedValue = start + (end - start) * (progress * (2 - progress));
+            callback(easedValue);
+            requestAnimationFrame(update);
+        }
+    }
+
+    requestAnimationFrame(update);
+}

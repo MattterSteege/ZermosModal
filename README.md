@@ -119,22 +119,11 @@ I don't recommend initializing a modal with params set, it is mostly used intern
       - `modal`: The current modal instance.
       - `color`: The selected color as a hexadecimal string (e.g., "#FF0000").
 
-- `addFileUpload(required, accept = '*', multiple = false, onChange = (modal, files) => {})`: Adds a file upload component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `files`: A FileList object containing the selected file(s).
-
 - `addRating(required, maxRating = 5, initialRating = 0, onChange = (modal, rating) => {})`: Adds a star rating component.
    - `onChange`: Callback function invoked with two parameters:
       - `modal`: The current modal instance.
       - `rating`: The selected rating as a number.
 
-- `addCaptcha(required)`: Adds a CAPTCHA component.
-   - Note: This method doesn't have an `onChange` callback. The CAPTCHA verification is handled internally.
-
-- `addSignature()`: Adds a signature pad component.
-   - Note: This method doesn't have an `onChange` callback. The signature data is saved internally when the user clicks the "Save" button.
-   - 
 ### 4.2 Rendering and Management
 
 - `render()`: Renders the modal and returns the DOM element. **Meant for internal use only!**
@@ -167,10 +156,7 @@ The library supports various component types, each with specific properties and 
 - Checkbox
 - Slider
 - Color Picker
-- File Upload
 - Rating
-- CAPTCHA
-- Signature Pad
 
 ## 6. Conditions and Dynamic Rendering
 
@@ -250,65 +236,59 @@ quiz.open();
 ### Advanced Example: Complex Survey with Multiple Question Types and Dynamic Rendering
 
 ```javascript
-const survey = new ZermosModal()
-  .addHeading("Customer Satisfaction Survey")
-  .addText("Please answer the following questions to help us improve our services.")
-  .addRating(true, 5, 0, (modal, value) => {
-    modal.setCondition("satisfaction", value);
-    console.log("Overall satisfaction:", value);
-  })
-  .addSubmenu("satisfaction <= 3", new ZermosSubModal()
-    .addHeading("We're sorry to hear that. What went wrong?", "", 2)
-    .addTextArea(true, "", null, (modal, value) => console.log("Negative feedback:", value))
-  )
-  .addSubmenu("satisfaction > 3", new ZermosSubModal()
-    .addHeading("Great! What did you enjoy most?", "", 2)
-    .addTextArea(false, "", null, (modal, value) => console.log("Positive feedback:", value))
-  )
-  .addHeading("Product Preferences", "", 2)
-  .addDropdown(
-    [
-      { label: "Electronics", value: "electronics" },
-      { label: "Clothing", value: "clothing" },
-      { label: "Food", value: "food" }
-    ],
-    true,
-    true,
-    (modal, values) => {
-      modal.setCondition("preferences", values);
-      console.log("Product preferences:", values);
-    }
-  )
-  .addSubmenu("preferences.includes('electronics')", new ZermosSubModal()
-    .addHeading("Electronics Preferences", "", 3)
-    .addCheckbox(false, (modal, value) => console.log("Interested in smartphones:", value))
-    .addText("Interested in smartphones")
-    .addCheckbox(false, (modal, value) => console.log("Interested in laptops:", value))
-    .addText("Interested in laptops")
-  )
-  .addSubmenu("preferences.includes('clothing')", new ZermosSubModal()
-    .addHeading("Clothing Preferences", "", 3)
-    .addColorPicker(false, "#000000", (modal, value) => console.log("Favorite color:", value))
-    .addText("Select your favorite color")
-  )
-  .addSubmenu("preferences.includes('food')", new ZermosSubModal()
-    .addHeading("Food Preferences", "", 3)
-    .addSlider(1, 10, 1, 5, (modal, value) => console.log("Spiciness preference:", value))
-    .addText("Spiciness preference (1-10)")
-  )
-  .addHeading("Additional Information", "", 2)
-  .addDatePicker(false, new Date(), (modal, value) => console.log("Preferred delivery date:", value))
-  .addFileUpload(false, "image/*", false, (modal, files) => console.log("Uploaded files:", files))
-  .addText("Upload a profile picture (optional)")
-  .addSignature()
-  .addText("Please sign to confirm your responses")
-  .addButton("Submit Survey", (modal) => {
-    const results = modal.getComponentsValue();
-    console.log("Survey results:", results);
-    // Process and submit survey results
-  });
-
-survey.open();
+    const survey = new ZermosModal()
+    .addHeading("Customer Satisfaction Survey")
+    .addText("Please answer the following questions to help us improve our services.")
+    .addRating(true, 5, 0, (modal, value) => {
+        modal.setCondition("satisfaction", value);
+        console.log("Overall satisfaction:", value);
+    })
+    .addSubmenu("satisfaction <= 3", new ZermosSubModal()
+        .addHeading("We're sorry to hear that. What went wrong?", "", 2)
+        .addTextArea(true, "", null, (modal, value) => console.log("Negative feedback:", value))
+    )
+    .addSubmenu("satisfaction > 3", new ZermosSubModal()
+        .addHeading("Great! What did you enjoy most?", "", 2)
+        .addTextArea(false, "", null, (modal, value) => console.log("Positive feedback:", value))
+    )
+    .addHeading("Product Preferences", "", 2)
+    .addDropdown(
+        [
+            { label: "Electronics", value: "electronics" },
+            { label: "Clothing", value: "clothing" },
+            { label: "Food", value: "food" }
+        ],
+        true,
+        true,
+        (modal, values) => {
+            modal.setCondition("preferences", values);
+            console.log("Product preferences:", values);
+        }
+    )
+    .addSubmenu("preferences.includes('electronics')", new ZermosSubModal()
+        .addHeading("Electronics Preferences", "", 3)
+        .addCheckbox(false, (modal, value) => console.log("Interested in smartphones:", value))
+        .addText("Interested in smartphones")
+        .addCheckbox(false, (modal, value) => console.log("Interested in laptops:", value))
+        .addText("Interested in laptops")
+    )
+    .addSubmenu("preferences.includes('clothing')", new ZermosSubModal()
+        .addHeading("Clothing Preferences", "", 3)
+        .addColorPicker(false, "#000000", (modal, value) => console.log("Favorite color:", value))
+        .addText("Select your favorite color")
+    )
+    .addSubmenu("preferences.includes('food')", new ZermosSubModal()
+        .addHeading("Food Preferences", "", 3)
+        .addSlider(1, 10, 1, 5, (modal, value) => console.log("Spiciness preference:", value))
+        .addText("Spiciness preference (1-10)")
+    )
+    .addHeading("Additional Information", "", 2)
+    .addDatePicker(false, new Date(), (modal, value) => console.log("Preferred delivery date:", value))
+    .addButton("Submit Survey", (modal) => {
+        const results = modal.getComponentsValue();
+        console.log("Survey results:", results);
+        // Process and submit survey results
+    });
 ```
 
 ## 9. Styling Guidelines
@@ -321,10 +301,7 @@ The ZermosModal library provides basic styling, but you can customize the appear
 - `.dropdown`: Dropdown container
 - `.slider-container`: Slider container
 - `.color-picker-container`: Color picker container
-- `.file-upload-container`: File upload container
 - `.rating-container`: Rating component container
-- `.captcha-container`: CAPTCHA container
-- `.signature-container`: Signature pad container
 
 ## 10. Best Practices
 
