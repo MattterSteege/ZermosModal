@@ -377,118 +377,79 @@ The library supports conditional rendering of components based on user-defined c
 ### Easy Example: Simple Contact Form
 
 ```javascript
-const contactForm = new ZermosModal()
-  .addHeading("Contact Us", "We'd love to hear from you!")
-  .addTextInput(true, "", null, (modal, value) => console.log("Name:", value))
-  .addTextInput(true, "", null, (modal, value) => console.log("Email:", value))
-  .addTextArea(false, "", null, (modal, value) => console.log("Message:", value))
-  .addButton("Submit", (modal) => {
-    console.log("Form submitted!");
-    // Add form submission logic here
-  });
+const modal = new ZermosModal()
+    .addHeading({ text: "Welcome!" })
+    .addText({ text: "This is a simple modal example." })
+    .addButton({ text: "Close", onClick: () => modal.close() });
 
-contactForm.open();
+modal.open();
 ```
 
 ### Medium Example: Quiz with Conditional Questions
 
 ```javascript
-const quiz = new ZermosModal()
-  .addHeading("Geography Quiz")
-  .addDropdown(
-    [
-      { label: "Europe", value: "europe" },
-      { label: "Asia", value: "asia" },
-      { label: "Africa", value: "africa" }
+const modal = new ZermosModal()
+.addHeading({ text: "User Information Form" })
+.addTextInput({ required: true, id: "name", initialValue: "", onChange: (ctx, value) => console.log("Name:", value) })
+.addLabel({ text: "Enter your name" })
+.addDropdown({
+    options: [
+        { label: "Red", value: "red" },
+        { label: "Green", value: "green" },
+        { label: "Blue", value: "blue" }
     ],
-    true,
-    false,
-    (modal, value) => modal.setCondition("continent", value)
-  )
-  .addSubmenu("continent == 'europe'", new ZermosSubModal()
-    .addHeading("European Capital", "", 2)
-    .addTextInput(true, "", null, (modal, value) => console.log("European capital:", value))
-  )
-  .addSubmenu("continent == 'asia'", new ZermosSubModal()
-    .addHeading("Asian Language", "", 2)
-    .addDropdown(
-      [
-        { label: "Mandarin", value: "mandarin" },
-        { label: "Hindi", value: "hindi" },
-        { label: "Japanese", value: "japanese" }
-      ],
-      true,
-      false,
-      (modal, value) => console.log("Asian language:", value)
-    )
-  )
-  .addSubmenu("continent == 'africa'", new ZermosSubModal()
-    .addHeading("African Animal", "", 2)
-    .addTextInput(true, "", null, (modal, value) => console.log("African animal:", value))
-  )
-  .addButton("Submit Quiz", (modal) => {
-    console.log("Quiz submitted:", modal.getComponentsValue());
-  });
+    required: true,
+    id: "color",
+    onChange: (ctx, value) => console.log("Favorite color:", value)
+})
+.addLabel({ text: "Choose your favorite color" })
+.addDatePicker({ required: true, id: "birthdate", onChange: (ctx, value) => console.log("Birthdate:", value) })
+.addLabel({ text: "Select your birthdate" })
+.addButton({ text: "Submit", onClick: (ctx) => {
+        const values = ctx.getComponentsValue();
+        if (values.correct) {
+            console.log("Form submitted:", values);
+            ctx.close();
+        } else {
+            alert("Please fill in all required fields.");
+        }
+    }});
 
-quiz.open();
+modal.open();
 ```
 
 ### Advanced Example: Complex Survey with Multiple Question Types and Dynamic Rendering
 
 ```javascript
-    const survey = new ZermosModal()
-    .addHeading("Customer Satisfaction Survey")
-    .addText("Please answer the following questions to help us improve our services.")
-    .addRating(true, 5, 0, (modal, value) => {
-        modal.setCondition("satisfaction", value);
-        console.log("Overall satisfaction:", value);
-    })
-    .addSubmenu("satisfaction <= 3", new ZermosSubModal()
-        .addHeading("We're sorry to hear that. What went wrong?", "", 2)
-        .addTextArea(true, "", null, (modal, value) => console.log("Negative feedback:", value))
+const subModal = new ZermosSubModal()
+    .addHeading({ text: "Additional Options" })
+    .addToggle({ label: "Enable notifications", id: "notifications", onChange: (ctx, value) => ctx.setCondition("notificationsEnabled", value) })
+    .addTextArea({ required: true, id: "notificationMessage", initialValue: "", maxLength: 100, onChange: (ctx, value) => console.log("Notification message:", value) })
+    .addLabel({ text: "Enter notification message" });
+
+const mainModal = new ZermosModal()
+    .addHeading({ text: "Advanced Settings" })
+    .addToggle({ label: "Dark Mode", id: "darkMode", onChange: (ctx, value) => console.log("Dark mode:", value) })
+    .addSlider({ min: 0, max: 100, step: 10, initialValue: 50, id: "volume", onChange: (ctx, value) => console.log("Volume:", value) })
+    .addLabel({ text: "Adjust volume" })
+    .addMultiCheckbox(
+        ["Option 1", "Option 2", "Option 3"],
+        [false, true, false],
+        (ctx, values) => console.log("Selected options:", values),
+        "multiOptions"
     )
-    .addSubmenu("satisfaction > 3", new ZermosSubModal()
-        .addHeading("Great! What did you enjoy most?", "", 2)
-        .addTextArea(false, "", null, (modal, value) => console.log("Positive feedback:", value))
-    )
-    .addHeading("Product Preferences", "", 2)
-    .addDropdown(
-        [
-            { label: "Electronics", value: "electronics" },
-            { label: "Clothing", value: "clothing" },
-            { label: "Food", value: "food" }
-        ],
-        true,
-        true,
-        (modal, values) => {
-            modal.setCondition("preferences", values);
-            console.log("Product preferences:", values);
-        }
-    )
-    .addSubmenu("preferences.includes('electronics')", new ZermosSubModal()
-        .addHeading("Electronics Preferences", "", 3)
-        .addCheckbox(false, (modal, value) => console.log("Interested in smartphones:", value))
-        .addText("Interested in smartphones")
-        .addCheckbox(false, (modal, value) => console.log("Interested in laptops:", value))
-        .addText("Interested in laptops")
-    )
-    .addSubmenu("preferences.includes('clothing')", new ZermosSubModal()
-        .addHeading("Clothing Preferences", "", 3)
-        .addColorPicker(false, "#000000", (modal, value) => console.log("Favorite color:", value))
-        .addText("Select your favorite color")
-    )
-    .addSubmenu("preferences.includes('food')", new ZermosSubModal()
-        .addHeading("Food Preferences", "", 3)
-        .addSlider(1, 10, 1, 5, (modal, value) => console.log("Spiciness preference:", value))
-        .addText("Spiciness preference (1-10)")
-    )
-    .addHeading("Additional Information", "", 2)
-    .addDatePicker(false, new Date(), (modal, value) => console.log("Preferred delivery date:", value))
-    .addButton("Submit Survey", (modal) => {
-        const results = modal.getComponentsValue();
-        console.log("Survey results:", results);
-        // Process and submit survey results
-    });
+    .addSubmenu({ showCondition: "notificationsEnabled == true", subModal: subModal })
+    .addColorPicker({ required: true, id: "themeColor", onChange: (ctx, value) => console.log("Theme color:", value) })
+    .addLabel({ text: "Choose theme color" })
+    .addButton({ text: "Save Settings", onClick: (ctx) => {
+            const values = ctx.getComponentsValue();
+            console.log("Settings saved:", values);
+            ctx.close();
+        }})
+    .addButton({ text: "Cancel", onClick: (ctx) => ctx.close() })
+    .addButton({ text: "Open Extra settings", onClick: (ctx) => ctx.setCondition("notificationsEnabled", true) });
+
+mainModal.open();
 ```
 
 ## 9. Styling Guidelines
