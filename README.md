@@ -28,101 +28,301 @@ The library consists of two main classes:
 
 ## 3. Constructor
 
-```javascript
-constructor(components = [], conditions = {})
-```
+#### `constructor(disableClosing = false, components = [], conditions = {})`
 
-- `components`: An array of component objects that define the modal's content.
-- `conditions`: An object containing key-value pairs for conditional rendering.
+Creates a new ZermosModal instance.
 
-I don't recommend initializing a modal with params set, it is mostly used internally for the `deepCopy()` function
+- `disableClosing` (boolean): If true, prevents the modal from being closed by clicking outside.
+- `components` (array): Initial array of components to be rendered in the modal.
+- `conditions` (object): Initial conditions for conditional rendering.
+- 
+I dont recommend setting `components` & `conditions` directly, but you do you.
 
 ## 4. Methods
 
-### 4.1 Adding Components
+### Adding Components
 
-- `addComponent(component)`: Adds a component to the modal. **Meant for internal use only!**
+#### `addHeading({ text, subheading = "", level = 1, id = undefined })`
 
-- `addHeading(text, subheading = "", level = 1)`: Adds a heading component.
+Adds a heading component to the modal.
 
-- `addToggle(label, initialState = false, onChange = (modal, isActive) => {})`: Adds a toggle switch.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `isActive`: Boolean indicating the new state of the toggle.
+- `text` (string): The main heading text.
+- `subheading` (string): Optional subheading text.
+- `level` (number): Heading level (1-6).
+- `id` (string): Optional unique identifier for the component.
 
-- `addButton(text, onClick = (modal) => {})`: Adds a button.
-   - `onClick`: Callback function invoked with one parameter:
-      - `modal`: The current modal instance.
+#### `addToggle({ label, initialState = false, onChange = () => {}, id = undefined })`
 
-- `addDoubleButtons(text, secondText, onClick = (modal) => {}, secondOnClick = (modal) => {})`: Adds two buttons side by side.
-   - Both `onClick` and `secondOnClick`: Callback functions invoked with one parameter:
-      - `modal`: The current modal instance.
+Adds a toggle switch component to the modal.
 
-- `addTripleButtons(text, secondText, thirdText, onClick = (modal) => {}, secondOnClick = (modal) => {}, thirdOnClick = (modal) => {})`: Adds three buttons side by side.
-   - All three callbacks (`onClick`, `secondOnClick`, `thirdOnClick`): Invoked with one parameter:
-      - `modal`: The current modal instance.
+- `label` (string): Label for the toggle switch.
+- `initialState` (boolean): Initial state of the toggle.
+- `onChange` (function): Callback function triggered when the toggle state changes.
+- `id` (string): Optional unique identifier for the component.
 
-- `addSubmenu(showCondition, subModal)`: Adds a submenu component.
+#### `addMultiToggles({ labels, initialStates = [], onChange = () => {}, id = undefined })`
 
-- `addText(text)`: Adds a text component.
+Adds multiple toggle switches as a group.
 
-- `addUrl(url, showFull = false, copyButton = true)`: Adds a URL component with optional copy functionality.
+- `labels` (array): Array of labels for each toggle.
+- `initialStates` (array): Array of initial states for each toggle.
+- `onChange` (function): Callback function triggered when any toggle state changes.
+- `id` (string): Optional unique identifier for the component.
 
-- `addDatePicker(required = false, initialDate = new Date(), onChange = (modal, selectedDate) => {})`: Adds a date picker.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `selectedDate`: The Date object representing the selected date.
+#### `addButton({ text, onClick = () => {}, id = undefined })`
 
-- `addDropdown(options, required = false, multiSelect = false, onChange = (modal, selectedValue) => {})`: Adds a dropdown component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `selectedValue`: The selected value (or array of values if `multiSelect` is true).
+Adds a button component to the modal.
 
-- `addSeparator(text = '')`: Adds a separator line with optional text.
+- `text` (string): Button text.
+- `onClick` (function): Callback function triggered when the button is clicked.
+- `id` (string): Optional unique identifier for the component.
 
-- `addImage(src, alt = '')`: Adds an image component.
+#### `addDoubleButtons({ text, secondText, onClick = () => {}, secondOnClick = () => {}, id = undefined })`
 
-- `addSpacer(height = "20px")`: Adds vertical space between components.
+Adds two buttons side by side.
 
-- `addNumberInput(required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = (modal, value) => {})`: Adds a number input component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `value`: The current numeric value of the input.
+- `text` (string): Text for the first button.
+- `secondText` (string): Text for the second button.
+- `onClick` (function): Callback for the first button.
+- `secondOnClick` (function): Callback for the second button.
+- `id` (string): Optional unique identifier for the component.
 
-- `addTextInput(required = false, initialValue = '', maxLength = null, onChange = (modal, value) => {})`: Adds a text input component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `value`: The current text value of the input.
+#### `addTripleButtons({ text, secondText, thirdText, onClick = () => {}, secondOnClick = () => {}, thirdOnClick = () => {}, id = undefined })`
 
-- `addPasswordInput(required = false, maxLength = null, onChange = (modal, value) => {})`: Adds a password input component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `value`: The current password value (as plain text).
+Adds three buttons side by side.
 
-- `addTextArea(required = false, initialValue = '', maxLength = null, onChange = (modal, value) => {})`: Adds a text area component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `value`: The current text value of the textarea.
+- `text`, `secondText`, `thirdText` (string): Text for each button.
+- `onClick`, `secondOnClick`, `thirdOnClick` (function): Callbacks for each button.
+- `id` (string): Optional unique identifier for the component.
 
-- `addCheckbox(initialState = false, onChange = (modal, isChecked) => {})`: Adds a checkbox component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `isChecked`: Boolean indicating whether the checkbox is checked.
+#### `addSubmenu({ showCondition, subModal, id = undefined })`
 
-- `addSlider(min = 0, max = 100, step = 1, initialValue = 50, onChange = (modal, value) => {})`: Adds a slider component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `value`: The current numeric value of the slider.
+Adds a submenu component to the modal.
 
-- `addColorPicker(required, initialColor = '#000000', onChange = (modal, color) => {})`: Adds a color picker component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `color`: The selected color as a hexadecimal string (e.g., "#FF0000").
+- `showCondition` (string): Condition for showing the submenu.
+- `subModal` (ZermosSubModal): Instance of ZermosSubModal for the submenu.
+- `id` (string): Optional unique identifier for the component.
 
-- `addRating(required, maxRating = 5, initialRating = 0, onChange = (modal, rating) => {})`: Adds a star rating component.
-   - `onChange`: Callback function invoked with two parameters:
-      - `modal`: The current modal instance.
-      - `rating`: The selected rating as a number.
+#### `addText({ text, asHtml = false, id = undefined })`
+
+Adds a text component to the modal.
+
+- `text` (string): The text content.
+- `asHtml` (boolean): If true, renders the text as HTML.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addLabel({ text, id = undefined })`
+
+Adds a label component to the modal.
+
+- `text` (string): The label text.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addUrl({ url, showFull = false, copyButton = true, id = undefined })`
+
+Adds a URL component to the modal.
+
+- `url` (string): The URL to display.
+- `showFull` (boolean): If true, shows the full URL.
+- `copyButton` (boolean): If true, adds a copy button for the URL.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addDatePicker({ required = false, initialDate = undefined, onChange = () => {}, id = undefined })`
+
+Adds a date picker component to the modal.
+
+- `required` (boolean): If true, makes the date selection required.
+- `initialDate` (Date): Initial date to display.
+- `onChange` (function): Callback function triggered when a date is selected.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addDropdown({ options, required = false, multiSelect = false, onChange = () => {}, id = undefined })`
+
+Adds a dropdown component to the modal.
+
+- `options` (array): Array of options for the dropdown.
+- `required` (boolean): If true, makes the selection required.
+- `multiSelect` (boolean): If true, allows multiple selections.
+- `onChange` (function): Callback function triggered when the selection changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addSeparator({ text = '', id = undefined })`
+
+Adds a separator component to the modal.
+
+- `text` (string): Optional text to display on the separator.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addImage({ src, alt = '', id = undefined })`
+
+Adds an image component to the modal.
+
+- `src` (string): Source URL of the image.
+- `alt` (string): Alternative text for the image.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addSpacer({ height = "20px", id = undefined })`
+
+Adds a spacer component to the modal.
+
+- `height` (string): Height of the spacer.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addNumberInput({ required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = () => {}, id = undefined })`
+
+Adds a number input component to the modal.
+
+- `required` (boolean): If true, makes the input required.
+- `initialValue` (number): Initial value of the input.
+- `decimals` (number): Number of decimal places to allow.
+- `min`, `max` (number): Minimum and maximum allowed values.
+- `step` (number): Step value for increments/decrements.
+- `onChange` (function): Callback function triggered when the value changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addTextInput({ required = false, initialValue = '', maxLength = -1, onChange = () => {}, id = undefined })`
+
+Adds a text input component to the modal.
+
+- `required` (boolean): If true, makes the input required.
+- `initialValue` (string): Initial value of the input.
+- `maxLength` (number): Maximum length of the input (-1 for no limit).
+- `onChange` (function): Callback function triggered when the value changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addPasswordInput({ required = false, maxLength = -1, onChange = () => {}, id = undefined })`
+
+Adds a password input component to the modal.
+
+- `required` (boolean): If true, makes the input required.
+- `maxLength` (number): Maximum length of the input (-1 for no limit).
+- `onChange` (function): Callback function triggered when the value changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addTextArea({ required = false, initialValue = '', maxLength = -1, onChange = () => {}, id = undefined })`
+
+Adds a text area component to the modal.
+
+- `required` (boolean): If true, makes the input required.
+- `initialValue` (string): Initial value of the text area.
+- `maxLength` (number): Maximum length of the input (-1 for no limit).
+- `onChange` (function): Callback function triggered when the value changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addCheckbox({ initialState = false, onChange = () => {}, id = undefined })`
+
+Adds a checkbox component to the modal.
+
+- `initialState` (boolean): Initial state of the checkbox.
+- `onChange` (function): Callback function triggered when the state changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addMultiCheckbox(labels, initialStates = [], onChange = () => {}, id = undefined)`
+
+Adds multiple checkbox components as a group.
+
+- `labels` (array): Array of labels for each checkbox.
+- `initialStates` (array): Array of initial states for each checkbox.
+- `onChange` (function): Callback function triggered when any checkbox state changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addSlider({ min = 0, max = 100, step = 1, initialValue = 50, onChange = () => {}, id = undefined })`
+
+Adds a slider component to the modal.
+
+- `min`, `max` (number): Minimum and maximum values for the slider.
+- `step` (number): Step value for increments/decrements.
+- `initialValue` (number): Initial value of the slider.
+- `onChange` (function): Callback function triggered when the value changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addColorPicker({ required, initialColor = '#000000', onChange = () => {}, id = undefined })`
+
+Adds a color picker component to the modal.
+
+- `required` (boolean): If true, makes the color selection required.
+- `initialColor` (string): Initial color value (hex format).
+- `onChange` (function): Callback function triggered when the color changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addRating({ required, maxRating = 5, initialRating = 0, onChange = () => {}, id = undefined })`
+
+Adds a rating component to the modal.
+
+- `required` (boolean): If true, makes the rating required.
+- `maxRating` (number): Maximum rating value.
+- `initialRating` (number): Initial rating value.
+- `onChange` (function): Callback function triggered when the rating changes.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addHTML({ html, id = undefined })`
+
+Adds raw HTML content to the modal.
+
+- `html` (string): HTML content to be rendered.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addCodeBlock({ code, id = undefined })`
+
+Adds a code block component to the modal.
+
+- `code` (string): Code content to be displayed.
+- `id` (string): Optional unique identifier for the component.
+
+#### `addList({ items, listType = "ul", id = undefined })`
+
+Adds a list component to the modal.
+
+- `items` (array): Array of list items.
+- `listType` (string): Type of list ("ul" for unordered, "ol" for ordered).
+- `id` (string): Optional unique identifier for the component.
+
+### Modal Management
+
+#### `open()`
+
+Opens the modal by rendering it and appending it to the document body.
+
+#### `openTroughAppending(element)`
+
+Opens the modal by appending it to a specific element.
+
+- `element` (HTMLElement): The element to append the modal to.
+
+#### `close()`
+
+Closes the modal with a fade-out animation.
+
+#### `closeAll()`
+
+Closes all open modals.
+
+### State Management
+
+#### `setCondition(key, value)`
+
+Sets a condition for conditional rendering.
+
+- `key` (string): The condition key.
+- `value` (any): The condition value.
+
+#### `getComponentsValue()`
+
+Retrieves the current values of all input components in the modal.
+
+Returns an object with:
+- `correct` (boolean): Indicates if all required fields are filled.
+- `values` (array): Array of objects containing the values of each input component.
+
+### Utility Methods
+
+#### `evaluateExpression(expression)`
+
+Evaluates a condition expression.
+
+- `expression` (string): The condition expression to evaluate.
+
+Returns a boolean indicating whether the condition is met.
 
 ### 4.2 Rendering and Management
 

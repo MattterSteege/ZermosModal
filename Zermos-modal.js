@@ -1,12 +1,14 @@
 ﻿class ZermosModal {
-    constructor(components = [], conditions = {}) {
+    constructor(disableClosing = false, components = [], conditions = {}) {
+        this.disableClosing = disableClosing;
         this.components = components;
         this.conditions = conditions;
+        this.tabIndex = 0;
         this.close();
     }
 
     addComponent(component) {
-        component.id = btoa(crypto.getRandomValues(new Uint8Array(8))).slice(0,11)
+        if (!component.id) component.id = btoa(crypto.getRandomValues(new Uint8Array(8))).slice(0,11);
         this.components.push(component);
         return this;
     }
@@ -17,6 +19,9 @@
         return this;
     }
 
+
+    //Returns the values of all the components in the modal an example would be (in json, but it's an object):
+    //{ correct: true, values: [{type: "input", id: "input1", value: "value1", correct: true}, ... ] }
     getComponentsValue() {
         var values = [];
         var correctForm = true;
@@ -53,95 +58,120 @@
 
     updateRenderedModal() {
         document.querySelectorAll('div[showCondition]').forEach(element => {
-            element.parentElement.style.display =
-                this.evaluateExpression(element.getAttribute("showCondition")) ? "block" : "none";
+            if (this.evaluateExpression(element.getAttribute('showCondition')))
+                element.parentElement.classList.remove("hidden");
+            else
+                element.parentElement.classList.add("hidden");
         });
     }
 
-    addHeading(text, subheading = "", level = 1) {
-        return this.addComponent({ type: 'heading', text, subheading, level });
+    addHeading({text, subheading = "", level = 1, id = undefined}) {
+        return this.addComponent({ type: 'heading', text, subheading, level, id: id});
     }
 
-    addToggle(label, initialState = false, onChange = () => {}) {
-        return this.addComponent({ type: 'toggleInput', label, state: initialState, onChange });
+    addToggle({label, initialState = false, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'toggleInput', label, state: initialState, onChange, id: id});
     }
 
-    addButton(text, onClick = () => {}) {
-        return this.addComponent({ type: 'button', text, onClick });
+    addMultiToggles({labels, initialStates = [],  onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'multiToggleInput', labels, states: initialStates, onChange, id: id});
     }
 
-    addDoubleButtons(text, secondText, onClick = () => {}, secondOnClick = () => {}) {
-        return this.addComponent({ type: 'doubleButton', text, onClick, secondText, secondOnClick });
+    addButton({text, onClick = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'button', text, onClick, id: id});
     }
 
-    addTripleButtons(text, secondText, thirdText, onClick = () => {}, secondOnClick = () => {}, thirdOnClick = () => {}) {
-        return this.addComponent({ type: 'tripleButton', text, onClick, secondText, secondOnClick, thirdText, thirdOnClick });
+    addDoubleButtons({text, secondText, onClick = () => {}, secondOnClick = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'doubleButton', text, onClick, secondText, secondOnClick, id: id});
     }
 
-    addSubmenu(showCondition, subModal) {
-        return this.addComponent({ type: 'submenu', showCondition, subModal });
+    addTripleButtons({text, secondText, thirdText, onClick = () => {}, secondOnClick = () => {}, thirdOnClick = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'tripleButton', text, onClick, secondText, secondOnClick, thirdText, thirdOnClick, id: id});
     }
 
-    addText(text) {
-        return this.addComponent({ type: 'text', text });
+    addSubmenu({showCondition, subModal, id = undefined}) {
+        return this.addComponent({ type: 'submenu', showCondition, subModal, id: id});
     }
 
-    addUrl(url, showFull = false, copyButton = true) {
-        return this.addComponent({ type: 'url', url, showFull, copyButton });
+    addText({text, asHtml = false, id = undefined}) {
+        return this.addComponent({ type: 'text', text, asHtml: asHtml, id: id});
+    }
+
+    addLabel({text, id = undefined}) {
+        return this.addComponent({ type: 'label', text, id: id});
+    }
+
+    addUrl({url, showFull = false, copyButton = true, id = undefined}) {
+        return this.addComponent({ type: 'url', url, showFull, copyButton, id: id});
     }
 
     ///INPUT ELEMENTS
-    addDatePicker(required = false, initialDate = new Date(), onChange = () => {}) {
-        return this.addComponent({ type: 'datePickerInput', required, initialDate, onChange });
+    addDatePicker({required = false, initialDate = new Date(), onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'datePickerInput', required, initialDate, onChange, id: id});
     }
 
-    addDropdown(options, required = false, multiSelect = false, onChange = () => {}) {
-        return this.addComponent({ type: 'dropdownInput', options, required, multiSelect, onChange });
+    addDropdown({options, required = false, multiSelect = false, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'dropdownInput', options, required, multiSelect, onChange, id: id});
     }
 
-    addSeparator(text = '') {
-        return this.addComponent({ type: 'separator', text });
+    addSeparator({text = '', id = undefined}) {
+        return this.addComponent({ type: 'separator', text, id: id});
     }
 
-    addImage(src, alt = '') {
-        return this.addComponent({ type: 'image', src, alt });
+    addImage({src, alt = '', id = undefined}) {
+        return this.addComponent({ type: 'image', src, alt, id: id});
     }
 
-    addSpacer(height = "20px") {
-        return this.addComponent({ type: 'spacer', height });
+    addSpacer({height = "20px", id = undefined}) {
+        return this.addComponent({ type: 'spacer', height, id: id});
     }
 
-    addNumberInput(required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = () => {}) {
-        return this.addComponent({ type: 'numberInput', required, initialValue, decimals, min, max, step, onChange });
+    addNumberInput({required = false, initialValue = 0, decimals = 0, min = Number.MIN_VALUE, max = Number.MAX_VALUE, step = 1, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'numberInput', required, initialValue, decimals, min, max, step, onChange, id: id});
     }
 
-    addTextInput(required = false, initialValue = '', maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'textInput', required, initialValue, maxLength, onChange });
+    addTextInput({required = false, initialValue = '', maxLength = -1, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'textInput', required, initialValue, maxLength, onChange, id: id});
     }
 
-    addPasswordInput(required = false, maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'passwordInput', required, maxLength, onChange });
+    addPasswordInput({required = false, maxLength = -1, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'passwordInput', required, maxLength, onChange, id: id});
     }
 
-    addTextArea(required = false, initialValue = '', maxLength = null, onChange = () => {}) {
-        return this.addComponent({ type: 'textAreaInput', required, initialValue, maxLength, onChange });
+    addTextArea({required = false, initialValue = '', maxLength = -1, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'textAreaInput', required, initialValue, maxLength, onChange, id: id});
     }
 
-    addCheckbox(initialState = false, onChange = () => {}) {
-        return this.addComponent({ type: 'toggleInput', state: initialState, asCheckbox: true, onChange });
+    addCheckbox({initialState = false, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'toggleInput', state: initialState, asCheckbox: true, onChange, id: id});
     }
 
-    /// NEW
-    addSlider(min = 0, max = 100, step = 1, initialValue = 50, onChange = () => {}) {
-        return this.addComponent({ type: 'sliderInput', min, max, step, initialValue, onChange });
+    addMultiCheckbox(labels, initialStates = [], onChange = () => {}, id = undefined) {
+        return this.addComponent({ type: 'multiToggleInput', labels, states: initialStates, asCheckbox: true, onChange, id: id});
     }
 
-    addColorPicker(required, initialColor = '#000000', onChange = () => {}) {
-        return this.addComponent({ type: 'colorPickerInput', required, initialColor, onChange });
+    addSlider({min = 0, max = 100, step = 1, initialValue = 50, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'sliderInput', min, max, step, initialValue, onChange, id: id});
     }
 
-    addRating(required, maxRating = 5, initialRating = 0, onChange = () => {}) {
-        return this.addComponent({ type: 'ratingInput', required, maxRating, initialRating, onChange });
+    addColorPicker({required, initialColor = '#000000', onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'colorPickerInput', required, initialColor, onChange, id: id});
+    }
+
+    addRating({required, maxRating = 5, initialRating = 0, onChange = () => {}, id = undefined}) {
+        return this.addComponent({ type: 'ratingInput', required, maxRating, initialRating, onChange, id: id});
+    }
+
+    addHTML({html, id = undefined}) {
+        return this.addComponent({ type: 'html', html, id: id});
+    }
+
+    addCodeBlock({code, id = undefined}) {
+        return this.addComponent({ type: 'code', code, id: id});
+    }
+
+    addList({items, listType = "ul", id = undefined}) {
+        return this.addComponent({ type: 'list', items, listType, id: id});
     }
 
     render() {
@@ -165,7 +195,9 @@
             tripleButton: this.renderTripleButton,
             submenu: this.renderSubmenu,
             text: this.renderText,
+            label: this.renderLabel,
             toggleInput: this.renderToggle,
+            multiToggleInput: this.renderMultiToggle,
             url: this.renderUrl,
             spacer: this.renderSpacer,
             separator: this.renderSeparator,
@@ -179,6 +211,9 @@
             sliderInput: this.renderSlider,
             colorPickerInput: this.renderColorPicker,
             ratingInput: this.renderRating,
+            html: this.renderHTML,
+            code: this.renderCodeBlock,
+            list: this.renderList
         };
 
         const renderMethod = renderMethods[component.type] || this.renderDefault;
@@ -195,7 +230,7 @@
     }
 
     renderButton(component, componentElement) {
-        const buttonElement = document.createElement("div");
+        const buttonElement = document.createElement("button");
         buttonElement.innerText = component.text;
         buttonElement.onclick = () => component.onClick(this);
         componentElement.appendChild(buttonElement);
@@ -203,11 +238,11 @@
     }
 
     renderDoubleButton(component, componentElement) {
-        const button1= document.createElement("div");
+        const button1= document.createElement("button");
         button1.innerText = component.text;
         button1.onclick = () => component.onClick(this);
 
-        const button2 = document.createElement("div");
+        const button2 = document.createElement("button");
         button2.innerText = component.secondText;
         button2.onclick = () => component.secondOnClick(this);
 
@@ -216,15 +251,15 @@
     }
 
     renderTripleButton(component, componentElement) {
-        const button1 = document.createElement("div");
+        const button1 = document.createElement("button");
         button1.innerText = component.text;
         button1.onclick = () => component.onClick(this);
 
-        const button2 = document.createElement("div");
+        const button2 = document.createElement("button");
         button2.innerText = component.secondText;
         button2.onclick = () => component.secondOnClick(this);
 
-        const button3 = document.createElement("div");
+        const button3 = document.createElement("button");
         button3.innerText = component.thirdText;
         button3.onclick = () => component.thirdOnClick(this);
 
@@ -236,41 +271,92 @@
         const subMenuElement = component.subModal.render();
         subMenuElement.setAttribute("showCondition", component.showCondition.replace("\"", "'"));
         componentElement.appendChild(subMenuElement);
-        componentElement.style.display = this.evaluateExpression(component.showCondition) ? "block" : "none";
+
+        if (this.evaluateExpression(component.showCondition))
+            componentElement.classList.remove("hidden");
+        else
+            componentElement.classList.add("hidden");
+
         return componentElement;
     }
 
     renderText(component, componentElement) {
         const textElement = document.createElement('p');
-        textElement.innerText = component.text;
+        component.asHtml ? textElement.innerHTML = component.text : textElement.innerText = component.text;
         componentElement.appendChild(textElement);
+        return componentElement;
+    }
+
+    renderLabel(component, componentElement) {
+        const labelElement = document.createElement('label');
+        labelElement.innerText = component.text;
+        componentElement.appendChild(labelElement);
         return componentElement;
     }
 
     renderToggle(component, componentElement) {
         component.userSetValue = component.state.toString();
 
-        const toggleElement = document.createElement('div');
-        toggleElement.classList.add("toggle-switch");
-        component.asCheckbox ? toggleElement.classList.add("as-checkbox") : null;
-        if (component.state) toggleElement.classList.add("active");
-        toggleElement.innerHTML = "<div class=\"switch\"></div>";
+        // Create the input element of type checkbox
+        const toggleElement = document.createElement('input');
+        toggleElement.type = 'checkbox';
+        toggleElement.classList.add('toggle-switch');
+        toggleElement.checked = component.state;
+        toggleElement.setAttribute('role', 'switch');
+        toggleElement.setAttribute('aria-checked', component.state ? 'true' : 'false');
+        toggleElement.setAttribute('tabindex', this.getTabIndex());
 
-        toggleElement.addEventListener('click', () => {
-            toggleElement.classList.toggle('active');
-            const isActive = toggleElement.classList.contains('active');
+        component.asCheckbox ? toggleElement.classList.add('as-checkbox') : null;
+
+        toggleElement.addEventListener('change', () => {
+            const isActive = toggleElement.checked;
+            toggleElement.setAttribute('aria-checked', isActive ? 'true' : 'false');
             if (component.onChange) {
                 component.onChange(this, isActive);
-                component.userSetValue = isActive.toString();
+                component.userSetValue = isActive;
             }
         });
 
-        const toggleLabelElement = document.createElement('div');
-        toggleLabelElement.classList.add("toggle-label");
-        toggleLabelElement.innerText = component.label;
+        // Create the label element and associate it with the input element
+        const toggleLabelElement = document.createElement('label');
+        toggleLabelElement.classList.add('toggle-label');
 
+        const toggleLabelText = document.createElement('p');
+        toggleLabelText.innerText = component.label;
+        toggleLabelText.setAttribute('for', toggleElement.id);
+
+        componentElement.appendChild(toggleLabelText);
+
+        // Append the elements to the component element
         componentElement.appendChild(toggleElement);
-        componentElement.appendChild(toggleLabelElement)
+        componentElement.appendChild(toggleLabelElement);
+
+        return componentElement;
+    }
+
+    renderMultiToggle(component, componentElement) {
+        //make a 2 column grid and add a toggle for each label (renderToggle)
+        const toggleContainer = document.createElement('div');
+        toggleContainer.classList.add('multi-toggle-container');
+        toggleContainer.setAttribute('role', 'group');
+        toggleContainer.setAttribute('aria-label', 'Multi Toggle Options');
+        toggleContainer.setAttribute('tabindex', this.getTabIndex());
+
+        component.userSetValue = component.states.map(state => state.toString());
+
+        component.labels.forEach((label, index) => {
+            const toggle = this.renderToggle({ type: 'toggleInput', label, state: component.states[index], asCheckbox: component.asCheckbox, onChange: (ctx, value) => {
+                    component.states[index] = value;
+                    if (component.onChange) {
+                        component.onChange(this, component.states);
+                        component.userSetValue = component.states;
+                    }
+                }}, document.createElement('div'));
+            toggleContainer.appendChild(toggle);
+        });
+
+        componentElement.appendChild(toggleContainer);
+
         return componentElement;
     }
 
@@ -278,20 +364,22 @@
         const urlSection = document.createElement('div');
         urlSection.className = 'url-section';
 
+        component.url = window.location.origin + component.url;
+
         const urlField = document.createElement('div');
         urlField.className = 'url-field';
         urlField.textContent = component.showFull ? component.url : (new URL(component.url).pathname + new URL(component.url).search);
         urlField.contentEditable = !component.copyButton;
+        urlField.setAttribute('role', 'link');
+        urlField.setAttribute('tabindex', this.getTabIndex());
 
         if (component.copyButton) {
-            const copyButton = document.createElement('div');
+            const copyButton = document.createElement('button');
             copyButton.className = 'copy button';
             copyButton.textContent = 'Kopieer';
 
             copyButton.addEventListener('click', () => {
-                navigator.clipboard.writeText(component.url)
-                    .then(() => console.log(`"${component.url}" was copied to your clipboard.`))
-                    .catch(err => console.error(`Error copying text to clipboard: ${err}`));
+                navigator.clipboard.writeText(component.url);
             });
 
             urlSection.appendChild(copyButton);
@@ -309,8 +397,10 @@
 
     renderSeparator(component, componentElement) {
         const separatorTextElement = document.createElement('p');
+        const separatorLineElement = document.createElement('div');
         separatorTextElement.innerText = component.text;
         componentElement.appendChild(separatorTextElement);
+        componentElement.appendChild(separatorLineElement);
         return componentElement;
     }
 
@@ -318,17 +408,29 @@
         const imageElement = document.createElement('img');
         imageElement.src = component.src;
         imageElement.alt = component.alt;
+        imageElement.setAttribute('role', 'img');
+        imageElement.setAttribute('aria-label', component.alt);
+
         componentElement.appendChild(imageElement);
         return componentElement;
     }
 
     renderDatePicker(component, componentElement) {
+        if (component.initialDate)
+            component.userSetValue = component.initialDate;
+        else
+            component.userSetValue = new Date();
+
         const datepicker = document.createElement('div');
         datepicker.className = 'datepicker-parent';
+        datepicker.setAttribute('role', 'combobox');
+        datepicker.setAttribute('aria-expanded', 'false');
+        datepicker.setAttribute('aria-haspopup', 'grid');
+        datepicker.setAttribute('tabindex', this.getTabIndex());
 
         const selectedDateElem = document.createElement('div');
         selectedDateElem.className = 'selected-date';
-        selectedDateElem.textContent = 'Select a date';
+        selectedDateElem.textContent = component.initialDate?.toLocaleDateString("nl-NL", {weekday: 'long',year: 'numeric',month: 'long',day: 'numeric'}) ?? 'Kies een datum';
         datepicker.appendChild(selectedDateElem);
 
         const calendarElem = document.createElement('div');
@@ -338,7 +440,7 @@
         calendarHeader.className = 'calendar-header';
         calendarElem.appendChild(calendarHeader);
 
-        const prevMonthButton = document.createElement('div');
+        const prevMonthButton = document.createElement('button');
         prevMonthButton.className = 'prev-month';
         prevMonthButton.textContent = '<';
         calendarHeader.appendChild(prevMonthButton);
@@ -347,7 +449,7 @@
         monthYearElem.className = 'month-year';
         calendarHeader.appendChild(monthYearElem);
 
-        const nextMonthButton = document.createElement('div');
+        const nextMonthButton = document.createElement('button');
         nextMonthButton.className = 'next-month';
         nextMonthButton.textContent = '>';
         calendarHeader.appendChild(nextMonthButton);
@@ -375,7 +477,7 @@
             }
 
             for (let day = 1; day <= daysInMonth; day++) {
-                const dayElem = document.createElement('div');
+                const dayElem = document.createElement('button');
                 dayElem.textContent = day;
                 dayElem.classList.add('day');
                 if (day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
@@ -383,7 +485,7 @@
                 }
                 dayElem.addEventListener('click', () => {
                     selectedDate = new Date(year, month, day);
-                    selectedDateElem.textContent = selectedDate.toDateString();
+                    selectedDateElem.textContent = selectedDate.toLocaleDateString("nl-NL", {weekday: 'long',year: 'numeric',month: 'long',day: 'numeric'});
                     renderCalendar(currentMonth, currentYear);
                     if (component.onChange) {
                         component.onChange(this, selectedDate);
@@ -397,6 +499,7 @@
         datepicker.addEventListener('click', () => {
             datepicker.classList.toggle("selected");
             calendarElem.classList.toggle("show");
+            datepicker.setAttribute('aria-expanded', datepicker.classList.contains('selected') ? 'true' : 'false');
         });
 
         prevMonthButton.addEventListener('click', () => {
@@ -428,13 +531,17 @@
 
         const dropdownElement = document.createElement('div');
         dropdownElement.classList.add('dropdown');
+        dropdownElement.setAttribute('role', 'combobox');
+        dropdownElement.setAttribute('aria-expanded', 'false');
 
-        const dropdownButton = document.createElement('div');
+        const dropdownButton = document.createElement('button');
         dropdownButton.classList.add('dropdown-button');
         dropdownButton.innerText = 'Select...';
+        dropdownButton.setAttribute('tabindex', this.getTabIndex());
 
         const dropdownMenu = document.createElement('div');
         dropdownMenu.classList.add('dropdown-menu');
+        dropdownMenu.setAttribute('role', 'listbox');
 
         component.options.forEach(option => {
             const optionElement = document.createElement('div');
@@ -453,7 +560,7 @@
                 }
                 const selectedOptions = Array.from(dropdownMenu.children)
                     .filter(child => child.classList.contains('selected'))
-                    .map(child => child.dataset.value);
+                    .map(child => child.dataset);
 
                 const selectedOptionsLabels = Array.from(dropdownMenu.children)
                     .filter(child => child.classList.contains('selected'))
@@ -473,6 +580,7 @@
         dropdownButton.addEventListener('click', () => {
             dropdownButton.classList.toggle("selected");
             dropdownMenu.classList.toggle("show");
+            dropdownElement.setAttribute('aria-expanded', dropdownButton.classList.contains('selected') ? 'true' : 'false');
         });
 
         dropdownElement.appendChild(dropdownButton);
@@ -483,175 +591,104 @@
     }
 
     renderNumberInput(component, componentElement) {
-        const numberInput = document.createElement('div');
+        const numberInput = document.createElement('input');
+        numberInput.type = 'number';
         numberInput.className = 'number-input';
+        numberInput.setAttribute('min', component.min);
+        numberInput.setAttribute('max', component.max);
+        numberInput.setAttribute('step', component.step);
+        numberInput.setAttribute('value', component.initialValue.toFixed(component.decimals));
+        numberInput.setAttribute('tabindex', this.getTabIndex());
 
-        const decrementButton = document.createElement('div');
-        decrementButton.className = 'decrement-button';
-        decrementButton.textContent = '-';
-
-        const numberDisplay = document.createElement('span');
-        numberDisplay.contentEditable = 'true';
-        numberDisplay.className = 'display';
-
-        const incrementButton = document.createElement('div');
-        incrementButton.className = 'increment-button';
-        incrementButton.textContent = '+';
-
-        numberInput.append(decrementButton, numberDisplay, incrementButton);
-
-        let value = component.initialValue;
-
-        const updateDisplay = () => {
-            numberDisplay.textContent = value.toFixed(component.decimals);
-            if (component.onChange) {
-                component.onChange(this, value);
-                component.userSetValue = value;
+        const updateValue = (newValue) => {
+            const value = parseFloat(newValue);
+            if (!isNaN(value) && value >= component.min && value <= component.max) {
+                numberInput.value = value.toFixed(component.decimals);
+                if (component.onChange) {
+                    component.onChange(this, value);
+                    component.userSetValue = value;
+                }
             }
         };
 
-        const increment = () => {
-            if (value + component.step <= component.max) {
-                value += component.step;
-                updateDisplay();
-            }
-        };
+        numberInput.addEventListener('input', (e) => updateValue(e.target.value));
+        numberInput.addEventListener('change', (e) => updateValue(e.target.value));
 
-        const decrement = () => {
-            if (value - component.step >= component.min) {
-                value -= component.step;
-                updateDisplay();
-            }
-        };
-
-        const validateAndSetInput = (inputValue) => {
-            let parsedValue = parseFloat(inputValue.replace(',', '.'));
-            if (!isNaN(parsedValue) && parsedValue >= component.min && parsedValue <= component.max) {
-                value = parsedValue;
-                updateDisplay();
-            }
-        };
-
-        incrementButton.addEventListener("click", increment);
-        decrementButton.addEventListener("click", decrement);
-
-        numberDisplay.addEventListener("input", (e) => validateAndSetInput(e.target.textContent));
-        numberDisplay.addEventListener("keypress", (e) => {
-            if (!/[0-9,.]/.test(String.fromCharCode(e.which))) {
-                e.preventDefault();
-            }
-        });
-
-        updateDisplay();
         componentElement.appendChild(numberInput);
         return componentElement;
     }
 
     renderTextInput(component, componentElement) {
-        const textElementInput = document.createElement('div');
-        textElementInput.className = 'text-element-input';
+        const inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.className = 'text-element-input display';
+        inputElement.value = component.initialValue;
+        if (component.maxLength !== -1)
+            inputElement.maxLength = component.maxLength;
 
-        const textDisplay = document.createElement('div');
-        textDisplay.contentEditable = 'true';
-        textDisplay.className = 'display';
-        textDisplay.textContent = component.initialValue;
+        inputElement.tabIndex = this.getTabIndex();
 
-        textElementInput.append(textDisplay);
-
-        const handleInput = (e) => {
-            if (component.maxLength && e.target.innerText.length > component.maxLength) {
-                e.target.innerText = e.target.innerText.slice(0, component.maxLength);
-            }
+        inputElement.addEventListener('input', (e) => {
             if (component.onChange) {
-                component.onChange(this, e.target.innerText);
-                component.userSetValue = e.target.innerText;
+                component.onChange(this, e.target.value);
+                component.userSetValue = e.target.value;
             }
-        };
+        });
 
-        textDisplay.addEventListener("input", handleInput);
-
-        componentElement.appendChild(textElementInput);
+        componentElement.appendChild(inputElement);
         return componentElement;
     }
 
     renderPasswordInput(component, componentElement) {
-        const passwordInput = document.createElement('div');
-        passwordInput.className = 'password-element-input';
+        const inputElement = document.createElement('input');
+        inputElement.type = 'password';
+        inputElement.className = 'password-element-input display';
+        inputElement.tabIndex = this.getTabIndex();
+        if (component.maxLength !== -1)
+            inputElement.maxLength = component.maxLength;
 
-        const textDisplay = document.createElement('div');
-        textDisplay.contentEditable = 'true';
-        textDisplay.className = 'display';
-
-        const eyeIcon = document.createElement('span');
+        const eyeIcon = document.createElement('div');
         eyeIcon.innerText = "👀";
         eyeIcon.className = 'eye-icon';
+        eyeIcon.setAttribute('aria-label', 'Toggle password visibility');
+        eyeIcon.tabIndex = 0;
 
-        passwordInput.append(textDisplay, eyeIcon);
-
-        let password = '';
         let showPassword = false;
-
-        const updateDisplay = () => {
-            textDisplay.innerText = showPassword ? password : '•'.repeat(password.length);
-            if (component.onChange) {
-                component.onChange(this, password);
-                component.userSetValue = password;
-            }
-        };
-
-        const handleKeydown = (e) => {
-            let sel = window.getSelection();
-            let pos = sel.focusOffset;
-
-            if (e.key === "Backspace" && pos > 0) {
-                password = password.slice(0, pos - 1) + password.slice(pos);
-            } else if (e.key.length === 1 && (!component.maxLength || password.length < component.maxLength)) {
-                password = password.slice(0, pos) + e.key + password.slice(pos);
-            } else if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
-                e.preventDefault();
-            }
-
-            updateDisplay();
-            this.setCursorPosition(textDisplay, pos + (e.key === "Backspace" ? -1 : 1));
-            e.preventDefault();
-        };
 
         eyeIcon.addEventListener('click', () => {
             showPassword = !showPassword;
-            updateDisplay();
+            inputElement.type = showPassword ? 'text' : 'password';
         });
 
-        textDisplay.addEventListener("keydown", handleKeydown);
+        inputElement.addEventListener('input', (e) => {
+            if (component.onChange) {
+                component.onChange(this, e.target.value);
+                component.userSetValue = e.target.value;
+            }
+        });
 
-        componentElement.appendChild(passwordInput);
+        componentElement.appendChild(inputElement);
+        componentElement.appendChild(eyeIcon);
         return componentElement;
     }
 
     renderTextArea(component, componentElement) {
-        const textAreaElementInput = document.createElement('div');
-        textAreaElementInput.className = 'textarea-element-input';
+        const textareaElement = document.createElement('textarea');
+        textareaElement.className = 'textarea-element-input display';
+        textareaElement.value = component.initialValue;
+        if (component.maxLength !== -1)
+            textareaElement.maxLength = component.maxLength;
 
-        const textDisplay = document.createElement('span');
-        textDisplay.contentEditable = 'true';
-        textDisplay.className = 'display';
-        textDisplay.role = 'textbox';
-        textDisplay.textContent = component.initialValue;
+        textareaElement.tabIndex = this.getTabIndex();
 
-        textAreaElementInput.append(textDisplay);
-
-        const handleInput = (e) => {
-            if (component.maxLength && e.target.innerText.length > component.maxLength) {
-                e.target.innerText = e.target.innerText.slice(0, component.maxLength);
-            }
+        textareaElement.addEventListener('input', (e) => {
             if (component.onChange) {
-                component.onChange(this, e.target.innerText);
-                component.userSetValue = e.target.innerText;
+                component.onChange(this, e.target.value);
+                component.userSetValue = e.target.value;
             }
-        };
+        });
 
-        textDisplay.addEventListener("input", handleInput);
-
-        componentElement.appendChild(textAreaElementInput);
+        componentElement.appendChild(textareaElement);
         return componentElement;
     }
 
@@ -659,88 +696,42 @@
         const sliderContainer = document.createElement('div');
         sliderContainer.className = 'slider-container';
 
-        const sliderTrack = document.createElement('div');
-        sliderTrack.className = 'slider-track';
-
-        const sliderThumb = document.createElement('div');
-        sliderThumb.className = 'slider-thumb';
+        const sliderInput = document.createElement('input');
+        sliderInput.type = 'range';
+        sliderInput.className = 'slider-input';
+        sliderInput.min = component.min;
+        sliderInput.max = component.max;
+        sliderInput.step = component.step;
+        sliderInput.value = component.initialValue;
 
         const valueDisplay = document.createElement('span');
         valueDisplay.className = 'slider-value';
         valueDisplay.textContent = component.initialValue;
 
-        sliderTrack.appendChild(sliderThumb);
-        sliderContainer.append(sliderTrack, valueDisplay);
-
-        const min = component.min;
-        const max = component.max;
-        const range = max - min;
-
-        // Set initial position
-        const initialPercentage = ((component.initialValue - min) / range) * 100;
-        sliderThumb.style.left = `${initialPercentage}%`;
-
-        let isDragging = false;
-
-        const updateSliderValue = (clientX) => {
-            const rect = sliderTrack.getBoundingClientRect();
-            let percentage = (clientX - rect.left) / rect.width;
-            percentage = Math.max(0, Math.min(percentage, 1));
-
-            const value = min + percentage * range;
-            const roundedValue = Math.round(value / component.step) * component.step;
-
-            sliderThumb.style.left = `${percentage * 100}%`;
+        sliderInput.addEventListener('input', () => {
+            const roundedValue = Math.round(sliderInput.value / component.step) * component.step;
             valueDisplay.textContent = roundedValue.toFixed(getDecimalPlaces(component.step));
 
             if (component.onChange) {
                 component.onChange(this, roundedValue);
                 component.userSetValue = roundedValue;
             }
-        };
-
-        sliderTrack.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            applyNoSelectionClass(true); // Apply no-selection class
-            updateSliderValue(e.clientX);
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                updateSliderValue(e.clientX);
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            applyNoSelectionClass(false); // Apply no-selection class
-        });
-
+        sliderContainer.append(sliderInput, valueDisplay);
         componentElement.appendChild(sliderContainer);
         return componentElement;
 
         function getDecimalPlaces(num) {
-            // Ensure num is a floating-point number
             let floatNum = parseFloat(num);
-            if (Math.floor(floatNum) === floatNum) return 0; // Check if the number is an integer
+            if (Math.floor(floatNum) === floatNum) return 0;
 
             let decimalPart = floatNum.toString().split('.')[1];
-
-            // Trim any trailing zeroes for a more sensible decimal count
             if (decimalPart) {
                 decimalPart = decimalPart.replace(/0+$/, '');
                 return Math.min(decimalPart.length, 2);
             } else {
                 return 0;
-            }
-        }
-
-        // Add this function to apply and remove the no-selection CSS class
-        function applyNoSelectionClass(apply) {
-            if (apply) {
-                document.body.classList.add('no-select');
-            } else {
-                document.body.classList.remove('no-select');
             }
         }
     }
@@ -757,16 +748,18 @@
         colorPalette.className = 'color-palette';
         colorPalette.style.display = "none";
 
-        const hexInput = document.createElement('div');
+        const hexInput = document.createElement('input');
         hexInput.className = 'hex-input';
-        hexInput.contentEditable = 'true';
-        hexInput.textContent = component.initialColor;
+        hexInput.type = 'text';
+        hexInput.value = component.initialColor;
 
         const rgbInputs = ['R', 'G', 'B'].map(channel => {
-            const input = document.createElement('div');
+            const input = document.createElement('input');
             input.className = 'rgb-input';
-            input.contentEditable = 'true';
-            input.textContent = '0';
+            input.type = 'number';
+            input.value = '0';
+            input.min = '0';
+            input.max = '255';
             return input;
         });
 
@@ -777,10 +770,10 @@
 
         const ctx = colorCircle.getContext('2d');
 
-// Create a conic gradient
+        // Create a conic gradient
         const gradient = ctx.createConicGradient(0, 75, 75);
 
-// Add five color stops
+        // Add five color stops
         gradient.addColorStop(0, "red");
         gradient.addColorStop(1/6, "yellow");
         gradient.addColorStop(2/6, "lime");
@@ -789,7 +782,7 @@
         gradient.addColorStop(5/6, "magenta");
         gradient.addColorStop(1, "red");
 
-// Set the fill style and draw a rectangle
+        // Set the fill style and draw a rectangle
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 150, 150);
 
@@ -819,23 +812,23 @@
 
         const setColorFromHex = (hex) => {
             const { r, g, b } = hexToRgb(hex);
-            rgbInputs[0].textContent = r;
-            rgbInputs[1].textContent = g;
-            rgbInputs[2].textContent = b;
+            rgbInputs[0].value = r;
+            rgbInputs[1].value = g;
+            rgbInputs[2].value = b;
             updateColorDisplay(hex);
         };
 
         const setColorFromRgb = () => {
-            const r = parseInt(rgbInputs[0].textContent, 10) || 0;
-            const g = parseInt(rgbInputs[1].textContent, 10) || 0;
-            const b = parseInt(rgbInputs[2].textContent, 10) || 0;
+            const r = parseInt(rgbInputs[0].value, 10) || 0;
+            const g = parseInt(rgbInputs[1].value, 10) || 0;
+            const b = parseInt(rgbInputs[2].value, 10) || 0;
             const hex = rgbToHex(r, g, b);
-            hexInput.textContent = hex;
+            hexInput.value = hex;
             updateColorDisplay(hex);
         };
 
         hexInput.addEventListener('input', (e) => {
-            const hex = e.target.textContent.trim();
+            const hex = e.target.value.trim();
             if (/^#[0-9A-F]{6}$/i.test(hex)) {
                 setColorFromHex(hex);
             }
@@ -868,9 +861,9 @@
         });
 
         const { r, g, b } = hexToRgb(component.initialColor);
-        rgbInputs[0].textContent = r;
-        rgbInputs[1].textContent = g;
-        rgbInputs[2].textContent = b;
+        rgbInputs[0].value = r;
+        rgbInputs[1].value = g;
+        rgbInputs[2].value = b;
 
         colorCircle.appendChild(colorSelector);
         colorPalette.append(hexInput, ...rgbInputs, colorCircle);
@@ -889,29 +882,64 @@
         ratingContainer.className = 'rating-container';
 
         for (let i = 1; i <= component.maxRating; i++) {
-            const star = document.createElement('span');
-            star.textContent = '☆';
-            star.dataset.value = i;
+            const starInput = document.createElement('input');
+            starInput.type = 'radio';
+            starInput.name = 'rating';
+            starInput.id = `star-${i}`;
+            starInput.value = i;
+            starInput.style.display = 'none';
 
-            if (i <= component.initialRating) {
-                star.textContent = '★';
-            }
+            const starLabel = document.createElement('label');
+            starLabel.htmlFor = `star-${i}`;
+            starLabel.textContent = i <= component.initialRating ? '★' : '☆';
 
-            star.addEventListener('click', (e) => {
-                const value = parseInt(e.target.dataset.value);
-                ratingContainer.querySelectorAll('span').forEach((s, index) => {
-                    s.textContent = index < value ? '★' : '☆';
+            starInput.addEventListener('change', () => {
+                ratingContainer.querySelectorAll('label').forEach((label, index) => {
+                    label.textContent = index < starInput.value ? '★' : '☆';
                 });
                 if (component.onChange) {
-                    component.onChange(this, value);
-                    component.userSetValue = value;
+                    component.onChange(this, i);
+                    component.userSetValue = i;
                 }
             });
 
-            ratingContainer.appendChild(star);
+            ratingContainer.appendChild(starInput);
+            ratingContainer.appendChild(starLabel);
         }
 
         componentElement.append(ratingContainer);
+        return componentElement;
+    }
+
+    renderHTML(component, componentElement) {
+        const htmlElement = document.createElement('div');
+        htmlElement.innerHTML = component.html;
+        componentElement.appendChild(htmlElement);
+        return componentElement;
+    }
+
+    renderCodeBlock(component, componentElement) {
+        const codeBlock = document.createElement('pre');
+        codeBlock.innerText = component.code;
+
+        //replace every <br><br> with <br>, and every <br><br><br><br> with <br><br>
+        codeBlock.innerHTML = codeBlock.innerHTML.replace(/<br><br>/g, "<br>").replace(/<br><br><br><br>/g, "<br><br>").replace(/<br><br><br><br><br><br>/g, "<br><br>");
+
+        //remove any leading or trailing <br> tags
+        codeBlock.innerHTML = codeBlock.innerHTML.replace(/^<br>/, "").replace(/<br>$/, "");
+
+        componentElement.appendChild(codeBlock);
+        return componentElement;
+    }
+
+    renderList(component, componentElement) {
+        const listElement = document.createElement(component.listType);
+        component.items.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.innerText = item;
+            listElement.appendChild(listItem);
+        });
+        componentElement.appendChild(listElement);
         return componentElement;
     }
 
@@ -953,35 +981,82 @@
         throw new Error('Unsupported value type:' + value);
     }
 
+    getTabIndex() {
+        return 1000 + this.tabIndex++;
+    }
+
     open() {
         const modalElement = this.render();
 
         const modalBackground = document.createElement('div');
+
         modalBackground.className = 'zermos-modal-background';
-        modalBackground.addEventListener('click', (e) => {
-            if (e.target === modalBackground) this.close();
-        });
+        if (!this.disableClosing) {
+            modalBackground.addEventListener('click', (e) => {
+                if (e.target === modalBackground) this.close();
+            });
+        }
+
         modalBackground.style.opacity = 0;
 
         //.zermos-modal-container
         const modalContainer = document.createElement('div');
         modalContainer.className = 'zermos-modal-container';
+        if (!this.disableClosing) {
+            modalContainer.addEventListener('click', (e) => {
+                if (e.target === modalContainer) this.close();
+            });
+        }
 
         modalContainer.appendChild(modalElement);
         modalBackground.appendChild(modalContainer);
         document.body.appendChild(modalBackground);
 
         ease(0, 1, 250, opacity => modalBackground.style.opacity = opacity);
+
+        this.modalElement = modalBackground;
+        this.openingType = "opening";
+        return this;
     }
 
+    openTroughAppending(element) {
+        const modalElement = this.render();
+
+        var centeringDiv = document.createElement('div');
+        centeringDiv.style.display = "flex";
+        centeringDiv.style.justifyContent = "center";
+        centeringDiv.style.alignItems = "center";
+        centeringDiv.style.height = "100%";
+        centeringDiv.style.width = "100%";
+
+        centeringDiv.appendChild(modalElement);
+        element.appendChild(centeringDiv);
+
+        this.modalElement = modalElement;
+        this.openingType = "appending";
+        return this;
+    }
+
+    //close w
     close() {
+        if (this.openingType === "opening") {
+            ease(1, 0, 250, opacity => this.modalElement.style.opacity = opacity);
+            setTimeout(() => this.modalElement.remove(), 300);
+        }
+
+        if (this.openingType === "appending") {
+            this.modalElement.parentElement.remove();
+        }
+    }
+
+    closeAll() {
         document.querySelectorAll('.zermos-modal-background').forEach(modal => modal.remove());
     }
 
     deepCopy() {
         const copiedComponents = this.components.map(component => ({...component}));
         const copiedConditions = {...this.conditions};
-        return new ZermosModal(copiedComponents, copiedConditions);
+        return new ZermosModal(this.disableClosing, copiedComponents, copiedConditions);
     }
 }
 
@@ -989,7 +1064,7 @@
 // Subclass for submenus, can override or add specific submenu behavior
 class ZermosSubModal extends ZermosModal {}
 
-function unloadModal() {
+window.unloadModal = () => {
     var modal = document.querySelector('.zermos-modal-background');
     if (modal) {
         ease(1, 0, 250, opacity => modal.style.opacity = opacity);
