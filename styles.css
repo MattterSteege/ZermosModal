@@ -245,7 +245,7 @@
 }
 
 .url-field, .dropdown-button, .datepicker-parent, .text-element-input.display,
-.textarea-element-input.display, .password-element-input.display {
+.textarea-element-input.display, .password-element-input.display, .dropdown-search {
     flex-grow: 1;
     padding: var(--modal-padding);
     border-radius: var(--modal-button-border-radius);
@@ -492,7 +492,7 @@
     height: calc(1.5 * var(--modal-button-height));
 }
 
-.dropdown-button::after, .datepicker-parent::after {
+.dropdown-button::after, .datepicker-parent::after, .timepicker-parent::after {
     content: '×';
     position: absolute;
     right: calc(0.2 * var(--modal-button-height));
@@ -639,11 +639,79 @@
     color: var(--modal-text-color);
 }
 
+.timepicker-parent {
+    display: flex;
+    align-items: center;
+    gap: var(--modal-padding);
+    width: 100%;
+    height: calc(1.5 * var(--modal-button-height));
+    padding: var(--modal-padding);
+    border-radius: var(--modal-button-border-radius);
+    background: var(--modal-input-bg);
+    cursor: pointer;
+}
+
+.timepicker-parent::after {
+}
+
+.timepicker-parent.selected::after {
+    rotate: 0deg;
+}
+
+.timepicker {
+    background: var(--modal-bg);
+    padding: 0;
+    border-radius: var(--modal-button-border-radius);
+    max-height: 0;
+    overflow-y: auto;
+    transition: all 0.25s ease;
+    opacity: 0;
+    display: flex;
+    gap: var(--modal-padding);
+}
+
+.timepicker.show {
+    max-height: 100px;
+    padding: var(--modal-padding);
+    opacity: 1;
+    margin-top: 10px;
+}
+
+.hours, .minutes {
+    width: 50px;
+    padding: var(--modal-padding);
+    border-radius: var(--modal-button-border-radius);
+    background: var(--modal-input-bg);
+}
+
+.timepicker select {
+    width: 100%;
+    padding: calc(var(--modal-padding) /2) var(--modal-padding);
+    border-radius: var(--modal-button-border-radius);
+    background: var(--modal-bg);
+    border: transparent;
+}
+
+.selected-time {
+    flex-grow: 1;
+    text-align: center;
+}
+
 .code pre {
     background: var(--modal-bg);
     padding: var(--modal-padding);
     border-radius: var(--modal-border-radius);
     overflow-y: auto;
+}
+
+input.dropdown-search {
+    position: relative;
+    left: calc(-1 * var(--modal-padding));
+    top: calc(-1 * var(--modal-padding));
+    width: calc(100% + 2 * var(--modal-padding));
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px solid #ccc;
 }
 
 @media only screen and (max-width: 1000px) {

@@ -64,7 +64,8 @@
                 onChange: (ctx, value) => console.log("Favorite color:", value)
             })
             .addLabel({ text: "Choose your favorite color" })
-            .addDatePicker({ required: true, id: "birthdate", onChange: (ctx, value) => console.log("Birthdate:", value) })
+            .addDatePicker({ required: true, id: "birthdate", onChange: (ctx, value) => console.log("Birthdate:", value), initialDate: new Date() })
+            .addTimePicker({ required: true, id: "time", onChange: (ctx, value) => console.log("Time:", value), initialTime: "12:00" })
             .addLabel({ text: "Select your birthdate" })
             .addButton({ text: "Submit", onClick: (ctx) => {
                     const values = ctx.getComponentsValue();

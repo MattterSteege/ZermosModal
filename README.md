@@ -20,6 +20,8 @@
 
 ZermosModal is a versatile JavaScript library for creating interactive and dynamic modal interfaces. It provides a flexible way to build complex forms, surveys, and interactive UI components with various input types and conditional rendering capabilities.
 
+This project is NOT a plug and play solution, it is a library that you can use to create your own modals with your own styling and logic. While a lot of the basic components are already implemented, you can always add/edit components to extend the library.
+
 ## 2. Class Overview
 
 The library consists of two main classes:
@@ -134,6 +136,15 @@ Adds a date picker component to the modal.
 - `required` (boolean): If true, makes the date selection required.
 - `initialDate` (Date): Initial date to display.
 - `onChange` (function): Callback function triggered when a date is selected.
+- `id` (string): Optional unique identifier for the component.
+
+### `addTimePicker({required: false, initialTime: undefined, onChange: () => {}, id: undefined})`
+
+Adds a time picker component to the modal.
+
+- `required` (boolean): If true, makes the time selection required.
+- `initialTime` (string): Initial time to display. in the format of "HH:MM".
+- `onChange` (function): Callback function triggered when a time is selected.
 - `id` (string): Optional unique identifier for the component.
 
 #### `addDropdown({ options, required = false, multiSelect = false, onChange = () => {}, id = undefined })`
@@ -297,6 +308,9 @@ Closes the modal with a fade-out animation.
 
 Closes all open modals.
 
+#### `onCloseCallback(callback)`
+Adds a callback function that will be called when the modal is closed via clicking outside the modal and NOT when called using `.close()`.
+
 ### State Management
 
 #### `setCondition(key, value)`
@@ -345,6 +359,7 @@ The library supports various component types, each with specific properties and 
 - Text
 - URL
 - Date Picker
+- Time Picker
 - Dropdown
 - Separator
 - Image
